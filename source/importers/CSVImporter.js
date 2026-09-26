@@ -1,7 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 const { Vault } = require("buttercup");
-const csvparse = require("csv-parse/lib/sync");
+const { parse: csvparse } = require("csv-parse/sync");
 
 /**
  * Importer for CSV files

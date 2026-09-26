@@ -2,20 +2,16 @@
   "name": "@buttercup/importer",
   "version": "3.1.0",
   "description": "Buttercup archive importer for other password manager archives",
-  "main": "dist/index.js",
+  "main": "source/index.js",
   "scripts": {
-    "build": "npm run build:node",
-    "build:node": "babel source --out-dir dist --minified --delete-dir-on-start --verbose",
-    "dev": "webpack --mode=development --watch --progress",
     "docs": "jsdoc2md 'source/**/*.js' > API.md",
     "format": "prettier --write '{source,test}/**/*.js'",
-    "prepublishOnly": "npm run build",
     "test": "run-s test:specs test:format",
     "test:format": "prettier --check '{source,test}/**/*.js'",
-    "test:specs": "npm run build && nyc mocha -r test/index.js 'test/specs/**/*.spec.js'"
+    "test:specs": "nyc mocha -r test/index.js 'test/specs/**/*.spec.js'"
   },
   "files": [
-    "dist/**/*.js",
+    "source/**/*.js",
     "*.md"
   ],
   "husky": {
@@ -51,17 +47,13 @@
   },
   "homepage": "https://github.com/buttercup/buttercup-importer#readme",
   "dependencies": {
-    "csv-parse": "^4.16.3",
+    "csv-parse": "^7.0.3",
     "is-dir": "^1.0.0",
     "layerr": "^1.0.0",
     "typedarray-to-buffer": "^4.0.0",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.19.3",
-    "@babel/core": "^7.20.5",
-    "@babel/plugin-proposal-object-rest-spread": "^7.20.2",
-    "@babel/preset-env": "^7.20.2",
     "@buttercup/exporter": "^1.1.0",
     "buttercup": "^6.16.5",
     "chai": "^4.3.7",

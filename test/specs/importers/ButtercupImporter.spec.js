@@ -1,5 +1,5 @@
 const path = require("path");
-const ButtercupImporter = require("../../../dist/importers/ButtercupImporter.js");
+const ButtercupImporter = require("../../../source/importers/ButtercupImporter.js");
 const { Entry, Group, Vault } = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(__dirname, "../../resources/test.bcup");

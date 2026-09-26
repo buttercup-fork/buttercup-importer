@@ -1,5 +1,15 @@
 # Buttercup importer changelog
 
+## Unreleased (codekunde fork)
+
+ * **Security**:
+   * `csv-parse` 4 → 7: prototype pollution through the `columns` option (GHSA-8cw4-87c7-c6xx), which all three CSV importers use on the chosen file. `csv-parse/lib/sync` no longer exists, so the importers load `csv-parse/sync`. New spec: a Buttercup CSV with a `__proto__` column leaves `Object.prototype` untouched
+   * `xml2js` 0.4 → 0.6: prototype pollution (GHSA-776f-qx25-q3cc), used by the KeePass XML importer
+ * Babel removed: the source is plain CommonJS, so `main` now points at `source/index.js` and there's no build step. This also makes the library installable straight from git
+ * CI runs on NodeJS 22 and 24 (was 14, 16 and 18), with `actions/checkout` and `setup-node` v5
+ * **Bugfix**:
+   * Keeper importer (added upstream after 3.1.0, never released): records in a folder were created once per folder level, records without a folder were skipped, and folders with the same name under different parents were merged. Its specs looked for titles the test file doesn't have; they now match it, and a new spec checks each record lands once, in its folder
+
 ## v3.1.0
 _2020-10-26_
 

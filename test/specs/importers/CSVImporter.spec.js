@@ -1,5 +1,5 @@
 const path = require("path");
-const CSVImporter = require("../../../dist/importers/CSVImporter.js");
+const CSVImporter = require("../../../source/importers/CSVImporter.js");
 const { Entry, Group, Vault } = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(
