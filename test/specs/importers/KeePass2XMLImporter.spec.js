@@ -1,5 +1,5 @@
 const path = require("path");
-const KeePass2XMLImporter = require("../../../dist/importers/KeePass2XMLImporter.js");
+const KeePass2XMLImporter = require("../../../source/importers/KeePass2XMLImporter.js");
 const { Entry, Group, Vault } = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(__dirname, "../../resources/test.kdbx.xml");

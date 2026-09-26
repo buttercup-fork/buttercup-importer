@@ -1,5 +1,5 @@
 const path = require("path");
-const LastPassImporter = require("../../../dist/importers/LastPassImporter.js");
+const LastPassImporter = require("../../../source/importers/LastPassImporter.js");
 const { Entry, Group, Vault } = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(__dirname, "../../resources/lastpass.csv");

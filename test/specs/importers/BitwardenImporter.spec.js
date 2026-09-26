@@ -1,5 +1,5 @@
 const path = require("path");
-const BitwardenImporter = require("../../../dist/importers/BitwardenImporter.js");
+const BitwardenImporter = require("../../../source/importers/BitwardenImporter.js");
 const { Entry, Group, Vault } = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(__dirname, "../../resources/bitwarden.json");

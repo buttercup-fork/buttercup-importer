@@ -1,5 +1,5 @@
 const path = require("path");
-const KeeperSecurityImporter = require("../../../dist/importers/KeeperSecurityImporter.js");
+const KeeperSecurityImporter = require("../../../source/importers/KeeperSecurityImporter.js");
 const { Entry, Group, Vault } = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(__dirname, "../../resources/keeper.json");
@@ -28,7 +28,7 @@ describe("KeeperSecurityImporter", function () {
     it("imports login properties", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Item with login"
+            "Folder Test"
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("username")).to.equal("username1");
@@ -38,10 +38,24 @@ describe("KeeperSecurityImporter", function () {
     it("imports URLs", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Item with login uri"
+            "Username Test"
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("URL")).to.equal("https://example.org/");
         // @todo should be a website
+    });
+
+    it("imports each record once, into its folder", function () {
+        expect(this.vault.getAllEntries()).to.have.lengthOf(3);
+        const [general] = this.vault.findGroupsByTitle("General");
+        const [bar] = this.vault.findGroupsByTitle("Bar");
+        const titles = (group) =>
+            group.getEntries().map((e) => e.getProperty("title"));
+        expect(titles(general)).to.deep.equal(["Username Test"]);
+        expect(titles(bar)).to.have.members([
+            "Folder Test",
+            "Sub Folder Entry Test",
+        ]);
+        expect(bar.getParentGroup().getTitle()).to.equal("Foo");
     });
 });

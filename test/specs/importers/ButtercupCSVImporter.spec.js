@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const { exportVaultToCSV } = require("@buttercup/exporter");
 const { Entry, Group, Vault } = require("buttercup");
-const ButtercupCSVImporter = require("../../../dist/importers/ButtercupCSVImporter.js");
+const ButtercupCSVImporter = require("../../../source/importers/ButtercupCSVImporter.js");
 
 const EXAMPLE_VAULT = path.resolve(__dirname, "../../resources/bcup.tmp.csv");
 
@@ -58,5 +58,20 @@ describe("ButtercupCSVImporter", function () {
         expect(entry.getProperty("username")).to.equal("user");
         expect(entry.getProperty("password")).to.equal("pass");
         expect(entry.getProperty("empty")).to.be.undefined;
+    });
+
+    it("doesn't let a __proto__ column pollute Object.prototype", function () {
+        const groupID = "f9666f86-cb94-483f-bb89-99afa12656e2";
+        const csv = [
+            "!type,!group_id,!group_name,!group_parent,title,__proto__,id",
+            `group,${groupID},General,0,,,`,
+            `entry,${groupID},,,Test,polluted,e17515ac-e87a-41e5-889c-88c279408cc8`,
+        ].join("\n");
+        return new ButtercupCSVImporter(csv).export().then((vault) => {
+            const [entry] = vault.getAllEntries();
+            expect(entry.getProperty("title")).to.equal("Test");
+            expect(Object.keys(Object.prototype)).to.have.lengthOf(0);
+            expect({}.polluted).to.be.undefined;
+        });
     });
 });

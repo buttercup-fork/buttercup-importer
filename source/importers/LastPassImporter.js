@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 const { Vault } = require("buttercup");
-const csvparse = require("csv-parse/lib/sync");
+const { parse: csvparse } = require("csv-parse/sync");
 
 const DEFAULT_GROUP = "General";
 

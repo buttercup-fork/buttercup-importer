@@ -37,44 +37,41 @@ class KeeperSecurityImporter {
             groups[null] = rootGroup;
 
             ksJson.records.forEach((record) => {
-                if (record.folders) {
-                    var folderPath = record.folders[0].folder;
-                    var folders = folderPath
-                        .split("\\")
-                        .map((folderName) => folderName.trim());
-
-                    var currentGroup = rootGroup;
-
-                    for (
-                        var folderIndex = 0;
-                        folderIndex < folders.length;
-                        folderIndex += 1
-                    ) {
-                        if (groups[folders[folderIndex]] != undefined) {
-                            currentGroup = groups[folders[folderIndex]];
-                        } else {
-                            currentGroup = currentGroup.createGroup(
-                                folders[folderIndex]
-                            );
-
-                            groups[folders[folderIndex]] = currentGroup;
+                // Folders are paths like "Foo\Bar"; records without one go
+                // in the root group. Groups are keyed by their full path, so
+                // folders with the same name under different parents stay
+                // apart.
+                let currentGroup = rootGroup;
+                const folderPath =
+                    record.folders && record.folders.length > 0
+                        ? record.folders[0].folder
+                        : "";
+                let path = "";
+                folderPath
+                    .split("\\")
+                    .map((folderName) => folderName.trim())
+                    .filter((folderName) => folderName.length > 0)
+                    .forEach((folderName) => {
+                        path = `${path}\\${folderName}`;
+                        if (!groups[path]) {
+                            groups[path] = currentGroup.createGroup(folderName);
                         }
-                        // Section untested due to an odd issue with createEntry not instancing correctly?
-                        const entry = currentGroup.createEntry(record.title);
-                        entry.setProperty(
-                            "username",
-                            record.login == null ? "" : record.login
-                        );
-                        entry.setProperty(
-                            "password",
-                            record.password == null ? "" : record.password
-                        );
-                        entry.setProperty(
-                            "URL",
-                            record.login_url == null ? "" : record.login_url
-                        );
-                    }
-                }
+                        currentGroup = groups[path];
+                    });
+
+                const entry = currentGroup.createEntry(record.title);
+                entry.setProperty(
+                    "username",
+                    record.login == null ? "" : record.login
+                );
+                entry.setProperty(
+                    "password",
+                    record.password == null ? "" : record.password
+                );
+                entry.setProperty(
+                    "URL",
+                    record.login_url == null ? "" : record.login_url
+                );
             });
 
             return vault;

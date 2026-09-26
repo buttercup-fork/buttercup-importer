@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 const { Group, Vault } = require("buttercup");
-const csvparse = require("csv-parse/lib/sync");
+const { parse: csvparse } = require("csv-parse/sync");
 
 const NON_COPY_KEYS = ["id", "title"];
 
