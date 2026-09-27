@@ -2,6 +2,9 @@
 
 ## Unreleased (codekunde fork)
 
+ * **Feature**:
+   * [#64](https://github.com/buttercup/buttercup-importer/issues/64) / [#60](https://github.com/buttercup/buttercup-importer/issues/60) Buttercup CSV round trip: entries keep their type (website, note, credit card, SSH key) and their attributes (field value types such as multi-line notes and OTP, field order, tags), read from the `!entry_type` and `!attributes` columns that the exporter fork now writes. Before, every re-imported entry became a login, and a website's URL showed up as a custom `url` field. CSVs without these columns still import, as logins. An unknown entry type or attributes that aren't a JSON object fail the import with a message naming the entry; attachment references, the entry type and `__proto__`/`constructor`/`prototype` keys in `!attributes` are ignored
+ * Specs: the Buttercup CSV round trip uses the `@buttercup/exporter` fork from git (was 1.1.0 from npm)
  * **Security**:
    * `csv-parse` 4 → 7: prototype pollution through the `columns` option (GHSA-8cw4-87c7-c6xx), which all three CSV importers use on the chosen file. `csv-parse/lib/sync` no longer exists, so the importers load `csv-parse/sync`. New spec: a Buttercup CSV with a `__proto__` column leaves `Object.prototype` untouched
    * `xml2js` 0.4 → 0.6: prototype pollution (GHSA-776f-qx25-q3cc), used by the KeePass XML importer
