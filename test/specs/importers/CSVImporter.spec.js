@@ -34,4 +34,43 @@ describe("CSVImporter", function () {
         expect(entry.getProperty("username")).to.be.undefined;
         expect(entry.getProperty("password")).to.be.undefined;
     });
+
+    describe("quoting", function () {
+        function importCSV(csv) {
+            return new CSVImporter(csv).export().then((vault) => {
+                const [entry] = vault.getAllEntries();
+                return entry;
+            });
+        }
+
+        it("reads standard doubled quotes", function () {
+            return importCSV('title,password\n"a","say ""hi"" there"\n').then(
+                (entry) => {
+                    expect(entry.getProperty("password")).to.equal(
+                        'say "hi" there'
+                    );
+                }
+            );
+        });
+
+        it("reads backslash-escaped quotes, as 1Password writes them (#66)", function () {
+            return importCSV(
+                'title,password\n"a","some-string \\"something\\""\n'
+            ).then((entry) => {
+                expect(entry.getProperty("password")).to.equal(
+                    'some-string "something"'
+                );
+            });
+        });
+
+        it("reads stray quotes in unquoted fields", function () {
+            return importCSV('title,password\na,some "quoted" text\n').then(
+                (entry) => {
+                    expect(entry.getProperty("password")).to.equal(
+                        'some "quoted" text'
+                    );
+                }
+            );
+        });
+    });
 });

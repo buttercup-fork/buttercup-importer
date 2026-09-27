@@ -3,6 +3,52 @@ const { onePasswordItemToEntry } = require("./1passwordEntry.js");
 const ONEPASS_FOLDER = /^system\.folder/i;
 const ONEPASS_SPACER = /^\*\*\*.+/;
 
+// 1Password for Windows 4 writes a category code instead of a type name
+const CATEGORY_TYPE_NAMES = {
+    "001": "webforms.WebForm",
+    "002": "wallet.financial.CreditCard",
+    "003": "securenotes.SecureNote",
+    "004": "identities.Identity",
+    "005": "passwords.Password",
+    100: "wallet.computer.License",
+    108: "wallet.government.SsnUS",
+    109: "wallet.computer.Router",
+    111: "wallet.onlineservices.Email.v2",
+};
+
+/**
+ * Bring a 1Password for Windows 4 item (category code, with the title and
+ * URL in `overview` and the fields in `details`) into the layout the Mac
+ * exports use (`typeName`, `title`, `location`, `secureContents`)
+ * @param {Object} item A parsed 1pif item
+ * @returns {Object} The item in the Mac layout
+ * @private
+ */
+function normalizeItem(item) {
+    if (item.typeName || !item.category) {
+        return item;
+    }
+    const overview = item.overview || {};
+    const details = item.details || {};
+    const secureContents = { ...details };
+    // Card, licence etc. values live in named section fields
+    (details.sections || []).forEach((section) => {
+        (section.fields || []).forEach((field) => {
+            if (field.n && secureContents[field.n] === undefined) {
+                secureContents[field.n] = field.v;
+            }
+        });
+    });
+    return {
+        ...item,
+        typeName:
+            CATEGORY_TYPE_NAMES[item.category] || `category.${item.category}`,
+        title: item.title || overview.title,
+        location: item.location || overview.url,
+        secureContents,
+    };
+}
+
 /**
  * Convert raw 1pif text to a JSON tree
  * @param {String} onePifRaw Exported 1PIF content
@@ -13,7 +59,7 @@ function convert1pifToJSON(onePifRaw) {
         .split(/\r\n|\n/)
         .map((line) => line.trim())
         .filter((line) => line.length > 0 && ONEPASS_SPACER.test(line) !== true)
-        .map((line) => JSON.parse(line));
+        .map((line) => normalizeItem(JSON.parse(line)));
     const groups = {};
     const entries = {};
     // let defaultGroup = null;

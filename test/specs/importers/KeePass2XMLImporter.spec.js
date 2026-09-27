@@ -45,4 +45,13 @@ describe("KeePass2XMLImporter", function () {
         );
         expect(entry.getProperty("password")).to.equal("test password");
     });
+
+    it("exports URLs (#31)", function () {
+        const entry = this.vault.findEntriesByProperty(
+            "title",
+            "Buttercup test"
+        )[0];
+        expect(entry.getProperty("URL")).to.equal("perrymitchell.net");
+        expect(entry.getURLs("general")).to.deep.equal(["perrymitchell.net"]);
+    });
 });

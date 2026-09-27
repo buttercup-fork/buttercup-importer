@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 const { Vault } = require("buttercup");
-const { parse: csvparse } = require("csv-parse/sync");
+const { parseCSV } = require("../tools/csv.js");
 
 const DEFAULT_GROUP = "General";
 
@@ -26,7 +26,7 @@ class LastPassImporter {
         const groups = {};
         return Promise.resolve().then(() => {
             const vault = new Vault();
-            csvparse(this._data, { columns: true }).forEach((lastpassItem) => {
+            parseCSV(this._data).forEach((lastpassItem) => {
                 const groupName = lastpassItem.grouping || DEFAULT_GROUP;
                 const group =
                     groups[groupName] ||
@@ -37,7 +37,11 @@ class LastPassImporter {
                     .setProperty("password", lastpassItem.password)
                     .setProperty("URL", lastpassItem.url);
                 if (lastpassItem.extra) {
-                    entry.setProperty("Notes", lastpassItem.extra);
+                    // Exports made on Windows can have CRLF line breaks
+                    entry.setProperty(
+                        "Notes",
+                        lastpassItem.extra.replace(/\r\n?/g, "\n")
+                    );
                 }
             });
             return vault;
