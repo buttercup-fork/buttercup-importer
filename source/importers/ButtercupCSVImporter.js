@@ -1,8 +1,15 @@
 const fs = require("fs/promises");
-const { Group, Vault } = require("buttercup");
+const { Entry, EntryType, Group, Vault } = require("buttercup");
 const { parse: csvparse } = require("csv-parse/sync");
 
 const NON_COPY_KEYS = ["id", "title"];
+const ENTRY_TYPES = Object.values(EntryType);
+// Attributes that can't be restored from a CSV: the type has its own column
+// and attachment data isn't exported
+const SKIPPED_ATTRIBUTE = new RegExp(
+    `^(${Entry.Attributes.FacadeType}|${Entry.Attributes.AttachmentPrefix})`
+);
+const UNSAFE_KEYS = ["__proto__", "constructor", "prototype"];
 
 /**
  * Importer for Buttercup CSV exports
@@ -52,6 +59,8 @@ class ButtercupCSVImporter {
                         .forEach((key) => {
                             entry.setProperty(key, bcupItem[key]);
                         });
+                    setEntryType(entry, bcupItem["!entry_type"]);
+                    setEntryAttributes(entry, bcupItem["!attributes"]);
                 } else {
                     throw new Error(
                         `Unrecognised item type in import: ${itemType}`
@@ -61,6 +70,62 @@ class ButtercupCSVImporter {
             return vault;
         });
     }
+}
+
+/**
+ * Set an entry's type from the `!entry_type` column (older exports don't
+ * have it, so their entries stay logins)
+ * @param {Entry} entry The new entry
+ * @param {String=} entryType The column value
+ * @private
+ */
+function setEntryType(entry, entryType) {
+    if (!entryType) return;
+    if (!ENTRY_TYPES.includes(entryType)) {
+        throw new Error(
+            `Unrecognised entry type in import: ${entryType} (entry: ${entry.getProperty(
+                "title"
+            )})`
+        );
+    }
+    entry.setAttribute(Entry.Attributes.FacadeType, entryType);
+}
+
+/**
+ * Set an entry's attributes (field value types, field order, tags etc.) from
+ * the JSON in the `!attributes` column
+ * @param {Entry} entry The new entry
+ * @param {String=} attributesJSON The column value
+ * @private
+ */
+function setEntryAttributes(entry, attributesJSON) {
+    if (!attributesJSON) return;
+    let attributes;
+    try {
+        attributes = JSON.parse(attributesJSON);
+    } catch (err) {
+        attributes = null;
+    }
+    if (
+        !attributes ||
+        typeof attributes !== "object" ||
+        Array.isArray(attributes)
+    ) {
+        throw new Error(
+            `Invalid attributes in import (not a JSON object) for entry: ${entry.getProperty(
+                "title"
+            )}`
+        );
+    }
+    Object.keys(attributes)
+        .filter(
+            (name) =>
+                !SKIPPED_ATTRIBUTE.test(name) && !UNSAFE_KEYS.includes(name)
+        )
+        .filter((name) => typeof attributes[name] === "string")
+        .forEach((name) => {
+            entry.setAttribute(name, attributes[name]);
+        });
 }
 
 /**

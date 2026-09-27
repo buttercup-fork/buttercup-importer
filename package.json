@@ -54,7 +54,7 @@
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@buttercup/exporter": "^1.1.0",
+    "@buttercup/exporter": "git+http://192.168.168.6:3050/buttercup.codekunde/buttercup-exporter.git#master",
     "buttercup": "^6.16.5",
     "chai": "^4.3.7",
     "husky": "^4.3.8",
