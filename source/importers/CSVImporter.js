@@ -1,7 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 const { Vault } = require("buttercup");
-const { parse: csvparse } = require("csv-parse/sync");
+const { parseCSV } = require("../tools/csv.js");
 
 /**
  * Importer for CSV files
@@ -27,22 +27,20 @@ class CSVImporter {
         return Promise.resolve().then(() => {
             const vault = new Vault();
             const group = vault.createGroup(this._groupName);
-            csvparse(this._csvData, { columns: true }).forEach(
-                (item, index) => {
-                    const entry = group.createEntry(
-                        item.name || item.title || item.url || `Entry ${index}`
-                    );
-                    if (item.username) {
-                        entry.setProperty("username", item.username);
-                    }
-                    if (item.password) {
-                        entry.setProperty("password", item.password);
-                    }
-                    if (item.url) {
-                        entry.setProperty("URL", item.url);
-                    }
+            parseCSV(this._csvData).forEach((item, index) => {
+                const entry = group.createEntry(
+                    item.name || item.title || item.url || `Entry ${index}`
+                );
+                if (item.username) {
+                    entry.setProperty("username", item.username);
                 }
-            );
+                if (item.password) {
+                    entry.setProperty("password", item.password);
+                }
+                if (item.url) {
+                    entry.setProperty("URL", item.url);
+                }
+            });
             return vault;
         });
     }

@@ -37,3 +37,37 @@ describe("OnePasswordImporter", function () {
         expect(customCard).to.be.an.instanceOf(Entry);
     });
 });
+
+describe("OnePasswordImporter (1Password for Windows 4, #40)", function () {
+    beforeEach(function () {
+        return OnePasswordImporter.loadFromFile(
+            path.resolve(
+                __dirname,
+                "../../resources/test-1password-windows.1pif"
+            )
+        )
+            .then((importer) => importer.export())
+            .then((vault) => {
+                this.vault = vault;
+            });
+    });
+
+    it("imports logins from items with a category instead of a type name", function () {
+        const [entry] = this.vault.findEntriesByProperty(
+            "title",
+            "buttercup.pw"
+        );
+        expect(entry).to.be.an.instanceOf(Entry);
+        expect(entry.getProperty("username")).to.equal("importer@buttercup.pw");
+        expect(entry.getProperty("password")).to.equal("if0bUeNqStN5Uqhp");
+        expect(entry.getProperty("url")).to.equal("https://buttercup.pw");
+    });
+
+    it("imports credit cards from section fields", function () {
+        const [entry] = this.vault.findEntriesByProperty("title", "Test card");
+        expect(entry).to.be.an.instanceOf(Entry);
+        expect(entry.getProperty("username")).to.equal("4111111111111111");
+        expect(entry.getProperty("password")).to.equal("123");
+        expect(entry.getProperty("cardholder")).to.equal("Jane Doe");
+    });
+});

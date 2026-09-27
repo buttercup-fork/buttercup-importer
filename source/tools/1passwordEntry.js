@@ -84,7 +84,7 @@ function onePasswordItemToEntry(rawItem) {
         if (rawItem.secureContents.name) {
             entry.meta.Name = rawItem.secureContents.name;
         }
-    } else if (ENTRY_ROUTER.test(rawItem)) {
+    } else if (ENTRY_ROUTER.test(rawItem.typeName)) {
         entry.username = rawItem.secureContents.network_name;
         entry.password = rawItem.secureContents.password;
         if (rawItem.secureContents.network_name) {
