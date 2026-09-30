@@ -1,5 +1,6 @@
 const fs = require("fs/promises");
 const { Entry, EntryType, Vault } = require("buttercup");
+const { addOTPProperty } = require("../tools/otp.js");
 
 const DEFAULT_GROUP = "General";
 
@@ -148,6 +149,10 @@ class BitwardenImporter {
                         entry.setProperty(itemField.name, `${itemField.value}`);
                     }
                 });
+                // After the custom fields, so one named OTP can't overwrite it
+                if (bitwardenItem.login && bitwardenItem.login.totp) {
+                    addOTPProperty(entry, "OTP", bitwardenItem.login.totp);
+                }
             });
 
             return vault;

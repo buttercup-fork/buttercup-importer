@@ -6,6 +6,7 @@ const ENTRY_LICENSE = /^wallet\.computer\.License/i;
 const ENTRY_EMAIL_V2 = /^wallet\.onlineservices\.Email\.v2/i;
 const ENTRY_SSN = /^wallet\.government\.SsnUS/i;
 const ENTRY_ROUTER = /^wallet\.computer\.Router/i;
+const OTP_FIELD_NAME = /^TOTP_/i;
 
 /**
  * Convert a 1password raw item to an entry object
@@ -99,7 +100,28 @@ function onePasswordItemToEntry(rawItem) {
     } else {
         return null;
     }
+    entry.otp = getOTPFields(rawItem);
     return entry;
+}
+
+/**
+ * Collect one-time password fields: 1Password keeps them in the item's
+ * sections, named TOTP_<id>, as an otpauth:// URI or a bare secret
+ * @param {Object} rawItem Extracted 1password item
+ * @returns {Array.<{ name: String, value: String }>}
+ * @private
+ */
+function getOTPFields(rawItem) {
+    const sections = (rawItem.secureContents || {}).sections || [];
+    return sections
+        .flatMap((section) => section.fields || [])
+        .filter(
+            (field) =>
+                field.v &&
+                (OTP_FIELD_NAME.test(field.n || "") ||
+                    /^otpauth:\/\//i.test(`${field.v}`)),
+        )
+        .map((field) => ({ name: field.t || "OTP", value: `${field.v}` }));
 }
 
 function testNormalEntryAndFieldsExist(rawItem) {
