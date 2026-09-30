@@ -3,6 +3,7 @@ const fs = require("fs/promises");
 const { statSync } = require("fs");
 const Buttercup = require("buttercup");
 const { convert1pifToJSON } = require("../tools/1password.js");
+const { addOTPProperty } = require("../tools/otp.js");
 
 const { Vault } = Buttercup;
 
@@ -25,6 +26,9 @@ function mapTreeLevelToVault(parentVaultItem, treeLevel) {
         if (rawEntry.password) {
             entry.setProperty("password", rawEntry.password);
         }
+        (rawEntry.otp || []).forEach(function ({ name, value }) {
+            addOTPProperty(entry, name, value);
+        });
         Object.keys(rawEntry.attributes).forEach(function (attributeKey) {
             entry.setAttribute(attributeKey, rawEntry.attributes[attributeKey]);
         });
