@@ -1,4 +1,5 @@
-const { Entry, EntryPropertyValueType } = require("buttercup");
+const { EntryPropertyValueType } = require("buttercup");
+const { addProperty } = require("./properties.js");
 
 const BASE32_SECRET = /^[A-Z2-7]+=*$/;
 
@@ -25,21 +26,6 @@ function toTOTPURI(value, label) {
 }
 
 /**
- * Find a property name that the entry doesn't use yet
- * @param {Entry} entry The entry
- * @param {String} name The preferred name
- * @returns {String}
- * @private
- */
-function unusedPropertyName(entry, name) {
-    let candidate = name;
-    for (let i = 2; entry.getProperty(candidate) !== undefined; i += 1) {
-        candidate = `${name} ${i}`;
-    }
-    return candidate;
-}
-
-/**
  * Add an exported one-time password to an entry. TOTP values become an
  * OTP field (shown as a live code); anything else is kept as plain text so
  * it isn't lost.
@@ -50,18 +36,10 @@ function unusedPropertyName(entry, name) {
  * @private
  */
 function addOTPProperty(entry, name, value) {
-    const property = unusedPropertyName(entry, name);
     const uri = toTOTPURI(value, entry.getProperty("title"));
-    if (uri) {
-        entry.setProperty(property, uri);
-        entry.setAttribute(
-            `${Entry.Attributes.FieldTypePrefix}${property}`,
-            EntryPropertyValueType.OTP,
-        );
-    } else {
-        entry.setProperty(property, `${value}`);
-    }
-    return property;
+    return uri
+        ? addProperty(entry, name, uri, EntryPropertyValueType.OTP)
+        : addProperty(entry, name, `${value}`);
 }
 
 module.exports = {

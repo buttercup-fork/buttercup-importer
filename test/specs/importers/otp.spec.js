@@ -169,7 +169,7 @@ describe("OnePasswordImporter: TOTP (#71)", function () {
         );
     });
 
-    it("ignores other section fields", async function () {
+    it("doesn't mark other section fields as OTP", async function () {
         const importer = new OnePasswordImporter(
             onePif([
                 onePasswordLogin("Other", [
@@ -178,6 +178,8 @@ describe("OnePasswordImporter: TOTP (#71)", function () {
             ]),
         );
         const entry = await exportEntry(importer, "Other");
-        expect(Object.keys(entry.getProperty())).to.not.include("PIN");
+        expect(entry.getPropertyValueType("PIN")).to.not.equal(
+            EntryPropertyValueType.OTP,
+        );
     });
 });
