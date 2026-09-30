@@ -48,6 +48,7 @@
   "homepage": "https://github.com/buttercup/buttercup-importer#readme",
   "dependencies": {
     "csv-parse": "^7.0.3",
+    "fflate": "^0.8.3",
     "layerr": "^1.0.0",
     "xml2js": "^0.6.2"
   },

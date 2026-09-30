@@ -165,7 +165,11 @@ function sectionFieldToProperty(field) {
         return null;
     }
     const name = title || id;
-    if (OTP_FIELD_NAME.test(id) || /^otpauth:\/\//i.test(`${value}`)) {
+    if (
+        kind === "totp" ||
+        OTP_FIELD_NAME.test(id) ||
+        /^otpauth:\/\//i.test(`${value}`)
+    ) {
         return {
             name: title || "OTP",
             value: `${value}`,
@@ -183,6 +187,21 @@ function sectionFieldToProperty(field) {
             ? {
                   name,
                   value: lines.join("\n"),
+                  valueType: EntryPropertyValueType.Note,
+              }
+            : null;
+    }
+    // .1pux wraps some values in objects
+    if (kind === "email" && typeof value === "object") {
+        return value.email_address
+            ? { name, value: `${value.email_address}`, valueType: null }
+            : null;
+    }
+    if (kind === "sshKey" && typeof value === "object") {
+        return value.privateKey
+            ? {
+                  name,
+                  value: `${value.privateKey}`,
                   valueType: EntryPropertyValueType.Note,
               }
             : null;
@@ -227,4 +246,5 @@ function testNormalEntryAndFieldsExist(rawItem) {
 
 module.exports = {
     onePasswordItemToEntry,
+    sectionFieldToProperty,
 };
