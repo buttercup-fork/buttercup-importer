@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs/promises");
-const isDir = require("is-dir").sync;
+const { statSync } = require("fs");
 const Buttercup = require("buttercup");
 const { convert1pifToJSON } = require("../tools/1password.js");
 
@@ -41,7 +41,7 @@ function mapTreeLevelToVault(parentVaultItem, treeLevel) {
  * @private
  */
 function resolve1pifFile(filePath) {
-    if (isDir(filePath)) {
+    if (statSync(filePath, { throwIfNoEntry: false })?.isDirectory()) {
         return path.resolve(filePath, "./data.1pif");
     }
     return filePath;

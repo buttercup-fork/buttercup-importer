@@ -44,7 +44,7 @@ describe("ButtercupCSVImporter", function () {
         expect(parent.getTitle()).to.equal("Test Group");
         expect(parent.getGroups()).to.have.lengthOf(
             1,
-            "Should be only 1 child group"
+            "Should be only 1 child group",
         );
         const [child] = parent.getGroups();
         expect(child.getTitle()).to.equal("Test Child Group");
@@ -92,7 +92,7 @@ describe("ButtercupCSVImporter", function () {
                 `!type,!group_id,!group_name,!group_parent,title,${extraHeadings},id`,
                 `group,${GROUP_ID},General,0,,${extraHeadings.replace(
                     /[^,]/g,
-                    ""
+                    "",
                 )},`,
                 `entry,${GROUP_ID},,,Test,${extraValues},${ENTRY_ID}`,
             ].join("\n");
@@ -109,7 +109,7 @@ describe("ButtercupCSVImporter", function () {
             return roundTrip(vault).then(([imported]) => {
                 expect(imported.getType()).to.equal(EntryType.Website);
                 expect(imported.getProperty("url")).to.equal(
-                    "https://example.com"
+                    "https://example.com",
                 );
                 expect(imported.getURLs("general")).to.deep.equal([
                     "https://example.com",
@@ -128,26 +128,26 @@ describe("ButtercupCSVImporter", function () {
             login.setProperty("Details", "a\nb");
             login.setAttribute(
                 `${Entry.Attributes.FieldTypePrefix}Details`,
-                "note"
+                "note",
             );
             login.setAttribute(ATTRIBUTE_TAGS, "work");
             return roundTrip(vault).then((entries) => {
                 const byTitle = (title) =>
                     entries.find(
-                        (entry) => entry.getProperty("title") === title
+                        (entry) => entry.getProperty("title") === title,
                     );
                 expect(byTitle("Note").getType()).to.equal(EntryType.Note);
                 expect(byTitle("Note").getProperty("note")).to.equal(
-                    "Line 1\nLine 2"
+                    "Line 1\nLine 2",
                 );
                 expect(byTitle("Login").getType()).to.equal(EntryType.Login);
                 expect(
                     byTitle("Login").getAttribute(
-                        `${Entry.Attributes.FieldTypePrefix}Details`
-                    )
+                        `${Entry.Attributes.FieldTypePrefix}Details`,
+                    ),
                 ).to.equal("note");
                 expect(byTitle("Login").getAttribute(ATTRIBUTE_TAGS)).to.equal(
-                    "work"
+                    "work",
                 );
             });
         });
@@ -194,9 +194,9 @@ describe("ButtercupCSVImporter", function () {
                 },
                 (err) => {
                     expect(err.message).to.match(
-                        /Unrecognised entry type in import: spaceship/
+                        /Unrecognised entry type in import: spaceship/,
                     );
-                }
+                },
             );
         });
 
@@ -207,9 +207,9 @@ describe("ButtercupCSVImporter", function () {
                 },
                 (err) => {
                     expect(err.message).to.match(
-                        /Invalid attributes in import/
+                        /Invalid attributes in import/,
                     );
-                }
+                },
             );
         });
 
@@ -223,7 +223,7 @@ describe("ButtercupCSVImporter", function () {
             }).replace(/"/g, '""');
             return importRow(
                 "!entry_type,!attributes",
-                `website,"${attributes}"`
+                `website,"${attributes}"`,
             ).then((vault) => {
                 const [entry] = vault.getAllEntries();
                 expect(entry.getType()).to.equal(EntryType.Website);

@@ -7,7 +7,7 @@ const ENTRY_TYPES = Object.values(EntryType);
 // Attributes that can't be restored from a CSV: the type has its own column
 // and attachment data isn't exported
 const SKIPPED_ATTRIBUTE = new RegExp(
-    `^(${Entry.Attributes.FacadeType}|${Entry.Attributes.AttachmentPrefix})`
+    `^(${Entry.Attributes.FacadeType}|${Entry.Attributes.AttachmentPrefix})`,
 );
 const UNSAFE_KEYS = ["__proto__", "constructor", "prototype"];
 
@@ -48,13 +48,14 @@ class ButtercupCSVImporter {
                 } else if (itemType === "entry") {
                     if (!group) {
                         throw new Error(
-                            `No group found for entry import: ${groupID}`
+                            `No group found for entry import: ${groupID}`,
                         );
                     }
                     const entry = group.createEntry(bcupItem.title);
                     Object.keys(bcupItem)
                         .filter((key) => /^\!.+/.test(key) === false)
                         .filter((key) => NON_COPY_KEYS.indexOf(key) === -1)
+                        .filter((key) => !UNSAFE_KEYS.includes(key))
                         .filter((key) => bcupItem[key])
                         .forEach((key) => {
                             entry.setProperty(key, bcupItem[key]);
@@ -63,7 +64,7 @@ class ButtercupCSVImporter {
                     setEntryAttributes(entry, bcupItem["!attributes"]);
                 } else {
                     throw new Error(
-                        `Unrecognised item type in import: ${itemType}`
+                        `Unrecognised item type in import: ${itemType}`,
                     );
                 }
             });
@@ -84,8 +85,8 @@ function setEntryType(entry, entryType) {
     if (!ENTRY_TYPES.includes(entryType)) {
         throw new Error(
             `Unrecognised entry type in import: ${entryType} (entry: ${entry.getProperty(
-                "title"
-            )})`
+                "title",
+            )})`,
         );
     }
     entry.setAttribute(Entry.Attributes.FacadeType, entryType);
@@ -113,14 +114,14 @@ function setEntryAttributes(entry, attributesJSON) {
     ) {
         throw new Error(
             `Invalid attributes in import (not a JSON object) for entry: ${entry.getProperty(
-                "title"
-            )}`
+                "title",
+            )}`,
         );
     }
     Object.keys(attributes)
         .filter(
             (name) =>
-                !SKIPPED_ATTRIBUTE.test(name) && !UNSAFE_KEYS.includes(name)
+                !SKIPPED_ATTRIBUTE.test(name) && !UNSAFE_KEYS.includes(name),
         )
         .filter((name) => typeof attributes[name] === "string")
         .forEach((name) => {

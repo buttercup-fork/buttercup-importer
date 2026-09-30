@@ -22,7 +22,7 @@ function processGroup(group, archive, currentGroup) {
     currentGroup = currentGroup || archive;
     subgroups.forEach(function (subgroup) {
         var buttercupGroup = currentGroup.createGroup(
-            extractString(subgroup.Name)
+            extractString(subgroup.Name),
         );
         if (subgroup.Group) {
             processGroup(subgroup, archive, buttercupGroup);
@@ -37,7 +37,7 @@ function processGroup(group, archive, currentGroup) {
                             friendlyKey = actualKey.toLowerCase();
                         if (
                             ["title", "username", "password"].indexOf(
-                                friendlyKey
+                                friendlyKey,
                             ) >= 0
                         ) {
                             entry.setProperty(friendlyKey, actualValue);

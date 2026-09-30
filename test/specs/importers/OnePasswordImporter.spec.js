@@ -4,7 +4,7 @@ const { Entry, Group, Vault } = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(
     __dirname,
-    "../../resources/test-1password.1pif"
+    "../../resources/test-1password.1pif",
 );
 
 describe("OnePasswordImporter", function () {
@@ -31,10 +31,23 @@ describe("OnePasswordImporter", function () {
         const testEntry = this.vault.findEntriesByProperty("title", "Test")[0];
         const customCard = this.vault.findEntriesByProperty(
             "title",
-            "Custom card"
+            "Custom card",
         )[0];
         expect(testEntry).to.be.an.instanceOf(Entry);
         expect(customCard).to.be.an.instanceOf(Entry);
+    });
+});
+
+describe("OnePasswordImporter (missing path)", function () {
+    it("rejects a path that doesn't exist", async function () {
+        const missing = path.resolve(__dirname, "../../resources/missing.1pif");
+        let error = null;
+        try {
+            await OnePasswordImporter.loadFromFile(missing);
+        } catch (err) {
+            error = err;
+        }
+        expect(error).to.have.property("code", "ENOENT");
     });
 });
 
@@ -43,8 +56,8 @@ describe("OnePasswordImporter (1Password for Windows 4, #40)", function () {
         return OnePasswordImporter.loadFromFile(
             path.resolve(
                 __dirname,
-                "../../resources/test-1password-windows.1pif"
-            )
+                "../../resources/test-1password-windows.1pif",
+            ),
         )
             .then((importer) => importer.export())
             .then((vault) => {
@@ -55,7 +68,7 @@ describe("OnePasswordImporter (1Password for Windows 4, #40)", function () {
     it("imports logins from items with a category instead of a type name", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "buttercup.pw"
+            "buttercup.pw",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("username")).to.equal("importer@buttercup.pw");

@@ -40,7 +40,7 @@ class LastPassImporter {
                     // Exports made on Windows can have CRLF line breaks
                     entry.setProperty(
                         "Notes",
-                        lastpassItem.extra.replace(/\r\n?/g, "\n")
+                        lastpassItem.extra.replace(/\r\n?/g, "\n"),
                     );
                 }
             });

@@ -40,7 +40,7 @@ function importCard(entry, card) {
     if (card.expMonth && card.expYear) {
         entry.setProperty(
             "expiry",
-            `${`${card.expMonth}`.padStart(2, "0")}/${card.expYear}`
+            `${`${card.expMonth}`.padStart(2, "0")}/${card.expYear}`,
         );
     }
 }
@@ -82,7 +82,7 @@ class BitwardenImporter {
             const bwJson = JSON.parse(this._data);
             if (bwJson.encrypted) {
                 throw new Error(
-                    "Encrypted Bitwarden exports can't be imported: export the vault as unencrypted JSON instead"
+                    "Encrypted Bitwarden exports can't be imported: export the vault as unencrypted JSON instead",
                 );
             }
 
@@ -96,9 +96,9 @@ class BitwardenImporter {
                         container.id,
                         container.name === DEFAULT_GROUP
                             ? defaultGroup
-                            : vault.createGroup(container.name)
+                            : vault.createGroup(container.name),
                     );
-                }
+                },
             );
             const getGroup = (item) =>
                 groups.get(item.folderId) ||
@@ -109,7 +109,7 @@ class BitwardenImporter {
 
             (bwJson.items || []).forEach((bitwardenItem) => {
                 const entry = getGroup(bitwardenItem).createEntry(
-                    bitwardenItem.name
+                    bitwardenItem.name,
                 );
 
                 if (bitwardenItem.login) {
@@ -135,7 +135,7 @@ class BitwardenImporter {
                     if (bitwardenItem.type === ITEM_NOTE) {
                         entry.setAttribute(
                             Entry.Attributes.FacadeType,
-                            EntryType.Note
+                            EntryType.Note,
                         );
                         entry.setProperty("note", bitwardenItem.notes);
                     } else {

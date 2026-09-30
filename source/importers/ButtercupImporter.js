@@ -14,7 +14,7 @@ function stripTrash(vaultFacade) {
     const trashGroup = vaultFacade.groups.find(
         (group) =>
             group.attributes &&
-            group.attributes[Group.Attribute.Role] === "trash"
+            group.attributes[Group.Attribute.Role] === "trash",
     );
     if (trashGroup) {
         vaultFacade.groups.splice(vaultFacade.groups.indexOf(trashGroup), 1);
@@ -77,7 +77,7 @@ class ButtercupImporter {
         return Promise.resolve().then(() => {
             const newVault = new Vault(this._Format);
             const facade = updateFacadeItemIDs(
-                stripTrash(createVaultFacade(this._source))
+                stripTrash(createVaultFacade(this._source)),
             );
             if (facade._ver >= FACADE_MIN_VER === false) {
                 throw new Error("Invalid or old facade version");
@@ -105,7 +105,7 @@ ButtercupImporter.loadFromFile = function (filename, masterPassword) {
                 path: filename,
             },
         },
-        masterPassword
+        masterPassword,
     );
     const fds = new FileDatasource(creds);
     return fds

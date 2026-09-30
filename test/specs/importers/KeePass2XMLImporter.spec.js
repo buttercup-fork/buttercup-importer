@@ -30,7 +30,7 @@ describe("KeePass2XMLImporter", function () {
     it("exports expected entries", function () {
         const entry = this.vault.findEntriesByProperty(
             "title",
-            "Buttercup test"
+            "Buttercup test",
         )[0];
         expect(entry).to.be.an.instanceOf(Entry);
     });
@@ -38,10 +38,10 @@ describe("KeePass2XMLImporter", function () {
     it("exports expected properties", function () {
         const entry = this.vault.findEntriesByProperty(
             "title",
-            "Buttercup test"
+            "Buttercup test",
         )[0];
         expect(entry.getProperty("Notes")).to.equal(
-            "Hello. My name is Inigo Montoya. You killed my father. Prepare to die."
+            "Hello. My name is Inigo Montoya. You killed my father. Prepare to die.",
         );
         expect(entry.getProperty("password")).to.equal("test password");
     });
@@ -49,7 +49,7 @@ describe("KeePass2XMLImporter", function () {
     it("exports URLs (#31)", function () {
         const entry = this.vault.findEntriesByProperty(
             "title",
-            "Buttercup test"
+            "Buttercup test",
         )[0];
         expect(entry.getProperty("URL")).to.equal("perrymitchell.net");
         expect(entry.getURLs("general")).to.deep.equal(["perrymitchell.net"]);
