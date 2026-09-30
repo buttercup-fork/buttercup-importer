@@ -4,8 +4,9 @@ const { statSync } = require("fs");
 const Buttercup = require("buttercup");
 const { convert1pifToJSON } = require("../tools/1password.js");
 const { addOTPProperty } = require("../tools/otp.js");
+const { addProperty } = require("../tools/properties.js");
 
-const { Vault } = Buttercup;
+const { EntryPropertyValueType, Vault } = Buttercup;
 
 /**
  * Map a 1PIF JSON tree back to an archive
@@ -26,8 +27,12 @@ function mapTreeLevelToVault(parentVaultItem, treeLevel) {
         if (rawEntry.password) {
             entry.setProperty("password", rawEntry.password);
         }
-        (rawEntry.otp || []).forEach(function ({ name, value }) {
-            addOTPProperty(entry, name, value);
+        (rawEntry.fields || []).forEach(function ({ name, value, valueType }) {
+            if (valueType === EntryPropertyValueType.OTP) {
+                addOTPProperty(entry, name, value);
+            } else {
+                addProperty(entry, name, value, valueType);
+            }
         });
         Object.keys(rawEntry.attributes).forEach(function (attributeKey) {
             entry.setAttribute(attributeKey, rawEntry.attributes[attributeKey]);

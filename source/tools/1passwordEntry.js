@@ -1,3 +1,5 @@
+const { EntryPropertyValueType } = require("buttercup");
+
 const ATTR_1PASS_TYPE = "ONEPASS_IMPORT_TYPE";
 const ENTRY_NORMAL = /^webforms\.WebForm/i;
 const ENTRY_CREDITCARD = /^wallet\.financial\.CreditCard/i;
@@ -7,6 +9,19 @@ const ENTRY_EMAIL_V2 = /^wallet\.onlineservices\.Email\.v2/i;
 const ENTRY_SSN = /^wallet\.government\.SsnUS/i;
 const ENTRY_ROUTER = /^wallet\.computer\.Router/i;
 const OTP_FIELD_NAME = /^TOTP_/i;
+
+// Section fields that the type-specific mapping below already imports
+const MAPPED_FIELDS = [
+    [
+        ENTRY_CREDITCARD,
+        ["cardholder", "type", "ccnum", "cvv", "expiry", "validFrom"],
+    ],
+    [ENTRY_PASSWORD, ["password"]],
+    [ENTRY_LICENSE, ["reg_code", "reg_email", "reg_name"]],
+    [ENTRY_EMAIL_V2, ["pop_username", "pop_password", "pop_server"]],
+    [ENTRY_SSN, ["number", "name"]],
+    [ENTRY_ROUTER, ["network_name", "password", "wireless_security", "server"]],
+];
 
 /**
  * Convert a 1password raw item to an entry object
@@ -100,28 +115,107 @@ function onePasswordItemToEntry(rawItem) {
     } else {
         return null;
     }
-    entry.otp = getOTPFields(rawItem);
+    entry.fields = getExtraFields(rawItem);
     return entry;
 }
 
 /**
- * Collect one-time password fields: 1Password keeps them in the item's
- * sections, named TOTP_<id>, as an otpauth:// URI or a bare secret
+ * Collect the fields that the type mapping doesn't cover: section fields
+ * (custom fields, a card's PIN or bank, one-time passwords...) and notes
  * @param {Object} rawItem Extracted 1password item
- * @returns {Array.<{ name: String, value: String }>}
+ * @returns {Array.<{ name: String, value: String, valueType: String|null }>}
  * @private
  */
-function getOTPFields(rawItem) {
-    const sections = (rawItem.secureContents || {}).sections || [];
-    return sections
+function getExtraFields(rawItem) {
+    const secureContents = rawItem.secureContents || {};
+    const mapped = new Set(
+        (MAPPED_FIELDS.find(([type]) => type.test(rawItem.typeName)) || [
+            null,
+            [],
+        ])[1],
+    );
+    const fields = (secureContents.sections || [])
         .flatMap((section) => section.fields || [])
-        .filter(
-            (field) =>
-                field.v &&
-                (OTP_FIELD_NAME.test(field.n || "") ||
-                    /^otpauth:\/\//i.test(`${field.v}`)),
-        )
-        .map((field) => ({ name: field.t || "OTP", value: `${field.v}` }));
+        .filter((field) => !mapped.has(field.n))
+        .map(sectionFieldToProperty)
+        .filter(Boolean);
+    if (
+        typeof secureContents.notesPlain === "string" &&
+        secureContents.notesPlain
+    ) {
+        fields.push({
+            name: "Notes",
+            value: secureContents.notesPlain,
+            valueType: EntryPropertyValueType.Note,
+        });
+    }
+    return fields;
+}
+
+/**
+ * Convert a 1Password section field to a property
+ * @param {Object} field The field: k (kind), n (name), t (title), v (value)
+ * @returns {{ name: String, value: String, valueType: String|null }|null}
+ *  The property, or null for an empty or unsupported field
+ * @private
+ */
+function sectionFieldToProperty(field) {
+    const { k: kind, n: id = "", t: title, v: value } = field;
+    if (value === undefined || value === null || value === "") {
+        return null;
+    }
+    const name = title || id;
+    if (OTP_FIELD_NAME.test(id) || /^otpauth:\/\//i.test(`${value}`)) {
+        return {
+            name: title || "OTP",
+            value: `${value}`,
+            valueType: EntryPropertyValueType.OTP,
+        };
+    }
+    if (!name) {
+        return null;
+    }
+    if (kind === "address" && typeof value === "object") {
+        const lines = ["street", "city", "state", "zip", "country"]
+            .map((part) => value[part])
+            .filter(Boolean);
+        return lines.length > 0
+            ? {
+                  name,
+                  value: lines.join("\n"),
+                  valueType: EntryPropertyValueType.Note,
+              }
+            : null;
+    }
+    if (typeof value === "object") {
+        return null;
+    }
+    if (kind === "date" && typeof value === "number") {
+        // Seconds since the epoch
+        const date = new Date(value * 1000).toISOString().slice(0, 10);
+        return { name, value: date, valueType: null };
+    }
+    if (kind === "monthYear" && /^\d{6}$/.test(`${value}`)) {
+        const text = `${value}`;
+        return {
+            name,
+            value: `${text.slice(4)}/${text.slice(0, 4)}`,
+            valueType: null,
+        };
+    }
+    const text = `${value}`;
+    if (kind === "concealed") {
+        return {
+            name,
+            value: text,
+            valueType: EntryPropertyValueType.Password,
+        };
+    }
+    return {
+        name,
+        value: text,
+        valueType: /\n/.test(text) ? EntryPropertyValueType.Note : null,
+    };
 }
 
 function testNormalEntryAndFieldsExist(rawItem) {
