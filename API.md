@@ -43,6 +43,8 @@
         * [new KeeperSecurityImporter(data)](#new_module_ButtercupImporter.KeeperSecurityImporter_new)
     * [.LastPassImporter](#module_ButtercupImporter.LastPassImporter)
         * [new LastPassImporter(data)](#new_module_ButtercupImporter.LastPassImporter_new)
+    * [.OnePassword1PUXImporter](#module_ButtercupImporter.OnePassword1PUXImporter)
+        * [new OnePassword1PUXImporter(data)](#new_module_ButtercupImporter.OnePassword1PUXImporter_new)
     * [.OnePasswordImporter](#module_ButtercupImporter.OnePasswordImporter)
         * [new OnePasswordImporter(onePIFData)](#new_module_ButtercupImporter.OnePasswordImporter_new)
         * [.export()](#module_ButtercupImporter.OnePasswordImporter+export) ⇒ <code>Promise.&lt;Vault&gt;</code>
@@ -175,6 +177,24 @@ Create a new LastPass importer
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>String</code> | Raw CSV data of a LastPass vault export |
+
+<a name="module_ButtercupImporter.OnePassword1PUXImporter"></a>
+
+### ButtercupImporter.OnePassword1PUXImporter
+Importer for 1Password .1pux exports (1Password 8, and 1Password 7 on
+Windows and Mac): a zip whose export.data holds the accounts, vaults and
+items as JSON. Attachments (the zip's files/ folder) aren't imported.
+
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+<a name="new_module_ButtercupImporter.OnePassword1PUXImporter_new"></a>
+
+#### new OnePassword1PUXImporter(data)
+Create a new 1Password .1pux importer
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>Buffer</code> \| <code>Uint8Array</code> | The contents of the .1pux file |
 
 <a name="module_ButtercupImporter.OnePasswordImporter"></a>
 
