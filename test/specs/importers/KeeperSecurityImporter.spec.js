@@ -28,7 +28,7 @@ describe("KeeperSecurityImporter", function () {
     it("imports login properties", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Folder Test"
+            "Folder Test",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("username")).to.equal("username1");
@@ -38,7 +38,7 @@ describe("KeeperSecurityImporter", function () {
     it("imports URLs", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Username Test"
+            "Username Test",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("URL")).to.equal("https://example.org/");

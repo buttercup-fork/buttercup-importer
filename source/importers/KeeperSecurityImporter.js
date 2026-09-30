@@ -62,15 +62,15 @@ class KeeperSecurityImporter {
                 const entry = currentGroup.createEntry(record.title);
                 entry.setProperty(
                     "username",
-                    record.login == null ? "" : record.login
+                    record.login == null ? "" : record.login,
                 );
                 entry.setProperty(
                     "password",
-                    record.password == null ? "" : record.password
+                    record.password == null ? "" : record.password,
                 );
                 entry.setProperty(
                     "URL",
-                    record.login_url == null ? "" : record.login_url
+                    record.login_url == null ? "" : record.login_url,
                 );
             });
 

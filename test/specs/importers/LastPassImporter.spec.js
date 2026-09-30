@@ -37,7 +37,7 @@ describe("LastPassImporter", function () {
     it("exports multi-line notes", function () {
         const [entry] = this.vault.findEntriesByProperty("title", "baz.com");
         expect(entry.getProperty("Notes")).to.equal(
-            "This is a\nmultiline string"
+            "This is a\nmultiline string",
         );
     });
 });

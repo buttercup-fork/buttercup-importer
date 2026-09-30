@@ -27,28 +27,30 @@
 ## ButtercupImporter
 
 * [ButtercupImporter](#module_ButtercupImporter)
-    * [~BitwardenImporter](#module_ButtercupImporter.BitwardenImporter)
+    * [.BitwardenImporter](#module_ButtercupImporter.BitwardenImporter)
         * [new BitwardenImporter(data)](#new_module_ButtercupImporter.BitwardenImporter_new)
-    * [~ButtercupCSVImporter](#module_ButtercupImporter.ButtercupCSVImporter)
+    * [.ButtercupCSVImporter](#module_ButtercupImporter.ButtercupCSVImporter)
         * [new ButtercupCSVImporter(csvData)](#new_module_ButtercupImporter.ButtercupCSVImporter_new)
-    * [~ButtercupImporter](#module_ButtercupImporter.ButtercupImporter)
+    * [.ButtercupImporter](#module_ButtercupImporter.ButtercupImporter)
         * [new ButtercupImporter(sourceVault)](#new_module_ButtercupImporter.ButtercupImporter_new)
-    * [~CSVImporter](#module_ButtercupImporter.CSVImporter)
+    * [.CSVImporter](#module_ButtercupImporter.CSVImporter)
         * [new CSVImporter(csvData, [name])](#new_module_ButtercupImporter.CSVImporter_new)
-    * [~KeePass2XMLImporter](#module_ButtercupImporter.KeePass2XMLImporter)
+    * [.KeePass2XMLImporter](#module_ButtercupImporter.KeePass2XMLImporter)
         * [new KeePass2XMLImporter(xmlContent)](#new_module_ButtercupImporter.KeePass2XMLImporter_new)
-    * [~LastPassImporter](#module_ButtercupImporter.LastPassImporter)
+    * [.KeeperSecurityImporter](#module_ButtercupImporter.KeeperSecurityImporter)
+        * [new KeeperSecurityImporter(data)](#new_module_ButtercupImporter.KeeperSecurityImporter_new)
+    * [.LastPassImporter](#module_ButtercupImporter.LastPassImporter)
         * [new LastPassImporter(data)](#new_module_ButtercupImporter.LastPassImporter_new)
-    * [~OnePasswordImporter](#module_ButtercupImporter.OnePasswordImporter)
+    * [.OnePasswordImporter](#module_ButtercupImporter.OnePasswordImporter)
         * [new OnePasswordImporter(onePIFData)](#new_module_ButtercupImporter.OnePasswordImporter_new)
         * [.export()](#module_ButtercupImporter.OnePasswordImporter+export) ⇒ <code>Promise.&lt;Vault&gt;</code>
 
 <a name="module_ButtercupImporter.BitwardenImporter"></a>
 
-### ButtercupImporter~BitwardenImporter
+### ButtercupImporter.BitwardenImporter
 Importer for Bitwarden vaults
 
-**Kind**: inner class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
 <a name="new_module_ButtercupImporter.BitwardenImporter_new"></a>
 
 #### new BitwardenImporter(data)
@@ -61,10 +63,10 @@ Create a new Bitwarden importer
 
 <a name="module_ButtercupImporter.ButtercupCSVImporter"></a>
 
-### ButtercupImporter~ButtercupCSVImporter
+### ButtercupImporter.ButtercupCSVImporter
 Importer for Buttercup CSV exports
 
-**Kind**: inner class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
 <a name="new_module_ButtercupImporter.ButtercupCSVImporter_new"></a>
 
 #### new ButtercupCSVImporter(csvData)
@@ -77,10 +79,10 @@ Create a new Buttercup CSV importer
 
 <a name="module_ButtercupImporter.ButtercupImporter"></a>
 
-### ButtercupImporter~ButtercupImporter
+### ButtercupImporter.ButtercupImporter
 Importer for Buttercup vaults
 
-**Kind**: inner class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
 <a name="new_module_ButtercupImporter.ButtercupImporter_new"></a>
 
 #### new ButtercupImporter(sourceVault)
@@ -93,10 +95,10 @@ Create a new Buttercup importer
 
 <a name="module_ButtercupImporter.CSVImporter"></a>
 
-### ButtercupImporter~CSVImporter
+### ButtercupImporter.CSVImporter
 Importer for CSV files
 
-**Kind**: inner class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
 <a name="new_module_ButtercupImporter.CSVImporter_new"></a>
 
 #### new CSVImporter(csvData, [name])
@@ -110,10 +112,10 @@ Create a new CSV importer
 
 <a name="module_ButtercupImporter.KeePass2XMLImporter"></a>
 
-### ButtercupImporter~KeePass2XMLImporter
+### ButtercupImporter.KeePass2XMLImporter
 Importer for KeePass XML exports
 
-**Kind**: inner class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
 <a name="new_module_ButtercupImporter.KeePass2XMLImporter_new"></a>
 
 #### new KeePass2XMLImporter(xmlContent)
@@ -124,12 +126,28 @@ Create a new KeePass XML importer
 | --- | --- | --- |
 | xmlContent | <code>String</code> | The XML content to import from |
 
+<a name="module_ButtercupImporter.KeeperSecurityImporter"></a>
+
+### ButtercupImporter.KeeperSecurityImporter
+Importer for Keeper Security vaults
+
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+<a name="new_module_ButtercupImporter.KeeperSecurityImporter_new"></a>
+
+#### new KeeperSecurityImporter(data)
+Create a new Keeper Security importer
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>String</code> | Raw JSON data of a Keeper Security vault export |
+
 <a name="module_ButtercupImporter.LastPassImporter"></a>
 
-### ButtercupImporter~LastPassImporter
+### ButtercupImporter.LastPassImporter
 Importer for LastPass CSV dumps
 
-**Kind**: inner class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
 <a name="new_module_ButtercupImporter.LastPassImporter_new"></a>
 
 #### new LastPassImporter(data)
@@ -142,12 +160,12 @@ Create a new LastPass importer
 
 <a name="module_ButtercupImporter.OnePasswordImporter"></a>
 
-### ButtercupImporter~OnePasswordImporter
+### ButtercupImporter.OnePasswordImporter
 Importer for 1Password vaults
 
-**Kind**: inner class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
 
-* [~OnePasswordImporter](#module_ButtercupImporter.OnePasswordImporter)
+* [.OnePasswordImporter](#module_ButtercupImporter.OnePasswordImporter)
     * [new OnePasswordImporter(onePIFData)](#new_module_ButtercupImporter.OnePasswordImporter_new)
     * [.export()](#module_ButtercupImporter.OnePasswordImporter+export) ⇒ <code>Promise.&lt;Vault&gt;</code>
 

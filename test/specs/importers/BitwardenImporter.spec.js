@@ -27,7 +27,7 @@ describe("BitwardenImporter", function () {
     it("contains expected entries", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Item without any info"
+            "Item without any info",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("username")).to.be.undefined;
@@ -37,7 +37,7 @@ describe("BitwardenImporter", function () {
     it("imports login properties", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Item with login"
+            "Item with login",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("username")).to.equal("username1");
@@ -48,7 +48,7 @@ describe("BitwardenImporter", function () {
     it("imports URLs", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Item with login uri"
+            "Item with login uri",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("URL")).to.equal("https://example.org");
@@ -58,7 +58,7 @@ describe("BitwardenImporter", function () {
     it("imports notes", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Item with notes"
+            "Item with notes",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("Notes")).to.equal("This is a note");
@@ -68,7 +68,7 @@ describe("BitwardenImporter", function () {
     it("imports fields as properties", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Item with fields"
+            "Item with fields",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("field1")).to.equal("example.com");
@@ -127,7 +127,7 @@ describe("BitwardenImporter (current export format, #51)", function () {
             ],
         }).then((vault) => {
             expect(getEntry(vault, "Lost").getGroup().getTitle()).to.equal(
-                "General"
+                "General",
             );
         });
     });
@@ -222,7 +222,7 @@ describe("BitwardenImporter (current export format, #51)", function () {
             },
             (err) => {
                 expect(err.message).to.match(/unencrypted JSON/);
-            }
+            },
         );
     });
 });

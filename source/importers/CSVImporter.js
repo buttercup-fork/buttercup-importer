@@ -29,7 +29,7 @@ class CSVImporter {
             const group = vault.createGroup(this._groupName);
             parseCSV(this._csvData).forEach((item, index) => {
                 const entry = group.createEntry(
-                    item.name || item.title || item.url || `Entry ${index}`
+                    item.name || item.title || item.url || `Entry ${index}`,
                 );
                 if (item.username) {
                     entry.setProperty("username", item.username);
@@ -58,7 +58,7 @@ CSVImporter.loadFromFile = function (filename) {
         .readFile(filename, "utf8")
         .then(
             (data) =>
-                new CSVImporter(data, path.basename(filename).split(".")[0])
+                new CSVImporter(data, path.basename(filename).split(".")[0]),
         );
 };
 

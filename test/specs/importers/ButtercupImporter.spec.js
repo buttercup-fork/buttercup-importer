@@ -21,12 +21,12 @@ describe("ButtercupImporter", function () {
         const [general] = this.vault.findGroupsByTitle("General");
         expect(general).to.be.an.instanceOf(
             Group,
-            "General group should exist"
+            "General group should exist",
         );
         const [sub] = general.getGroups();
         expect(sub).to.be.an.instanceOf(
             Group,
-            "Sub group should exist under General"
+            "Sub group should exist under General",
         );
     });
 
@@ -37,7 +37,7 @@ describe("ButtercupImporter", function () {
         expect(entry.getProperty("title")).to.equal("Test Entry");
         expect(entry.getProperty("username")).to.equal("user@site.com");
         expect(entry.getProperty("password")).to.equal(
-            "W6dV-_71OpO~%;WZz0+*czcqay+&=;8;khc"
+            "W6dV-_71OpO~%;WZz0+*czcqay+&=;8;khc",
         );
     });
 });

@@ -4,7 +4,7 @@ const { Entry, Group, Vault } = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(
     __dirname,
-    "../../resources/chrome_pass.csv"
+    "../../resources/chrome_pass.csv",
 );
 
 describe("CSVImporter", function () {
@@ -28,7 +28,7 @@ describe("CSVImporter", function () {
     it("exports expected entries", function () {
         const [entry] = this.vault.findEntriesByProperty(
             "title",
-            "Item without any info"
+            "Item without any info",
         );
         expect(entry).to.be.an.instanceOf(Entry);
         expect(entry.getProperty("username")).to.be.undefined;
@@ -47,18 +47,18 @@ describe("CSVImporter", function () {
             return importCSV('title,password\n"a","say ""hi"" there"\n').then(
                 (entry) => {
                     expect(entry.getProperty("password")).to.equal(
-                        'say "hi" there'
+                        'say "hi" there',
                     );
-                }
+                },
             );
         });
 
         it("reads backslash-escaped quotes, as 1Password writes them (#66)", function () {
             return importCSV(
-                'title,password\n"a","some-string \\"something\\""\n'
+                'title,password\n"a","some-string \\"something\\""\n',
             ).then((entry) => {
                 expect(entry.getProperty("password")).to.equal(
-                    'some-string "something"'
+                    'some-string "something"',
                 );
             });
         });
@@ -67,9 +67,9 @@ describe("CSVImporter", function () {
             return importCSV('title,password\na,some "quoted" text\n').then(
                 (entry) => {
                     expect(entry.getProperty("password")).to.equal(
-                        'some "quoted" text'
+                        'some "quoted" text',
                     );
-                }
+                },
             );
         });
     });
