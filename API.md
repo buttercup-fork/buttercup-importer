@@ -37,6 +37,8 @@
         * [new CSVImporter(csvData, [name])](#new_module_ButtercupImporter.CSVImporter_new)
     * [.KeePass2XMLImporter](#module_ButtercupImporter.KeePass2XMLImporter)
         * [new KeePass2XMLImporter(xmlContent)](#new_module_ButtercupImporter.KeePass2XMLImporter_new)
+    * [.KeePassXCCSVImporter](#module_ButtercupImporter.KeePassXCCSVImporter)
+        * [new KeePassXCCSVImporter(data)](#new_module_ButtercupImporter.KeePassXCCSVImporter_new)
     * [.KeeperSecurityImporter](#module_ButtercupImporter.KeeperSecurityImporter)
         * [new KeeperSecurityImporter(data)](#new_module_ButtercupImporter.KeeperSecurityImporter_new)
     * [.LastPassImporter](#module_ButtercupImporter.LastPassImporter)
@@ -125,6 +127,22 @@ Create a new KeePass XML importer
 | Param | Type | Description |
 | --- | --- | --- |
 | xmlContent | <code>String</code> | The XML content to import from |
+
+<a name="module_ButtercupImporter.KeePassXCCSVImporter"></a>
+
+### ButtercupImporter.KeePassXCCSVImporter
+Importer for KeePassXC CSV exports (Database → Export → CSV File)
+
+**Kind**: static class of [<code>ButtercupImporter</code>](#module_ButtercupImporter)  
+<a name="new_module_ButtercupImporter.KeePassXCCSVImporter_new"></a>
+
+#### new KeePassXCCSVImporter(data)
+Create a new KeePassXC CSV importer
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>String</code> | Raw CSV data of a KeePassXC export |
 
 <a name="module_ButtercupImporter.KeeperSecurityImporter"></a>
 
