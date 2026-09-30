@@ -1,0 +1,6 @@
+"Group","Title","Username","Password","URL","Notes","TOTP","Icon","Last Modified","Created"
+"Root","Top level","top","topPass","https://top.test","","","0","2026-09-01T10:00:00Z","2026-09-01T10:00:00Z"
+"Root/Email","Mail","me@mail.test","m@ilPass","https://mail.test","First line
+Second line, with ""quotes""","otpauth://totp/Mail:me?secret=JBSWY3DPEHPK3PXP&period=30&digits=6&issuer=Mail","1","2026-09-02T10:00:00Z","2026-09-02T10:00:00Z"
+"Root/Email/Work","Work mail","me@work.test","w0rk","","","","1","2026-09-03T10:00:00Z","2026-09-03T10:00:00Z"
+"Root/Banking","Bank","customer","b4nk","https://bank.test","","","0","2026-09-04T10:00:00Z","2026-09-04T10:00:00Z"
