@@ -63,6 +63,15 @@ describe("CSVImporter", function () {
             });
         });
 
+        it("skips a UTF-8 BOM, as Excel writes it", function () {
+            return importCSV("\uFEFFtitle,password\nCafé,s3cret\n").then(
+                (entry) => {
+                    expect(entry.getProperty("title")).to.equal("Café");
+                    expect(entry.getProperty("password")).to.equal("s3cret");
+                },
+            );
+        });
+
         it("reads stray quotes in unquoted fields", function () {
             return importCSV('title,password\na,some "quoted" text\n').then(
                 (entry) => {

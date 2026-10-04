@@ -32,7 +32,10 @@ class ButtercupCSVImporter {
     export() {
         return Promise.resolve().then(() => {
             const vault = new Vault();
-            csvparse(this._csvData, { columns: true }).forEach((bcupItem) => {
+            // Skip the BOM the export starts with (for Excel), or the first
+            // column would be "\uFEFF!type" and no row would have a type
+            const rows = csvparse(this._csvData, { bom: true, columns: true });
+            rows.forEach((bcupItem) => {
                 const {
                     ["!type"]: itemType,
                     ["!group_id"]: groupID,
