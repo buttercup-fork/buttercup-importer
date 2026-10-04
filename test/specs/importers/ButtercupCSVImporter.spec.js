@@ -75,6 +75,24 @@ describe("ButtercupCSVImporter", function () {
         });
     });
 
+    it("imports an export that starts with a UTF-8 BOM (desktop #749)", function () {
+        const vault = new Vault();
+        vault
+            .createGroup("Accès Client")
+            .createEntry("Café")
+            .setProperty("username", "user")
+            .setProperty("password", "pass");
+        return exportVaultToCSV(vault)
+            .then((csv) => new ButtercupCSVImporter(`\uFEFF${csv}`).export())
+            .then((imported) => {
+                const [group] = imported.getGroups();
+                expect(group.getTitle()).to.equal("Accès Client");
+                const [entry] = imported.getAllEntries();
+                expect(entry.getProperty("title")).to.equal("Café");
+                expect(entry.getProperty("password")).to.equal("pass");
+            });
+    });
+
     describe("entry types and attributes (#64, #60)", function () {
         const GROUP_ID = "f9666f86-cb94-483f-bb89-99afa12656e2";
         const ENTRY_ID = "e17515ac-e87a-41e5-889c-88c279408cc8";
