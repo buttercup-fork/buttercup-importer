@@ -9,7 +9,9 @@ const ENTRY_TYPES = Object.values(EntryType);
 const SKIPPED_ATTRIBUTE = new RegExp(
     `^(${Entry.Attributes.FacadeType}|${Entry.Attributes.AttachmentPrefix})`,
 );
-const UNSAFE_KEYS = ["__proto__", "constructor", "prototype"];
+// Core refuses only this name: fields like "constructor" or "toString" are
+// ordinary fields, and exports keep them
+const UNSAFE_KEY = "__proto__";
 
 /**
  * Importer for Buttercup CSV exports
@@ -58,7 +60,7 @@ class ButtercupCSVImporter {
                     Object.keys(bcupItem)
                         .filter((key) => /^\!.+/.test(key) === false)
                         .filter((key) => NON_COPY_KEYS.indexOf(key) === -1)
-                        .filter((key) => !UNSAFE_KEYS.includes(key))
+                        .filter((key) => key !== UNSAFE_KEY)
                         .filter((key) => bcupItem[key])
                         .forEach((key) => {
                             entry.setProperty(key, bcupItem[key]);
@@ -122,10 +124,7 @@ function setEntryAttributes(entry, attributesJSON) {
         );
     }
     Object.keys(attributes)
-        .filter(
-            (name) =>
-                !SKIPPED_ATTRIBUTE.test(name) && !UNSAFE_KEYS.includes(name),
-        )
+        .filter((name) => !SKIPPED_ATTRIBUTE.test(name) && name !== UNSAFE_KEY)
         .filter((name) => typeof attributes[name] === "string")
         .forEach((name) => {
             entry.setAttribute(name, attributes[name]);

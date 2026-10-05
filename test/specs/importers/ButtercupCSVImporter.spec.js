@@ -75,6 +75,22 @@ describe("ButtercupCSVImporter", function () {
         });
     });
 
+    it("keeps fields named like built-in object properties (B-461)", function () {
+        const groupID = "f9666f86-cb94-483f-bb89-99afa12656e2";
+        const csv = [
+            "!type,!group_id,!group_name,!group_parent,title,constructor,prototype,toString,hasOwnProperty,id",
+            `group,${groupID},General,0,,,,,,`,
+            `entry,${groupID},,,Test,c,p,t,h,e17515ac-e87a-41e5-889c-88c279408cc8`,
+        ].join("\n");
+        return new ButtercupCSVImporter(csv).export().then((vault) => {
+            const [entry] = vault.getAllEntries();
+            expect(entry.getProperty("constructor")).to.equal("c");
+            expect(entry.getProperty("prototype")).to.equal("p");
+            expect(entry.getProperty("toString")).to.equal("t");
+            expect(entry.getProperty("hasOwnProperty")).to.equal("h");
+        });
+    });
+
     it("imports an export that starts with a UTF-8 BOM (desktop #749)", function () {
         const vault = new Vault();
         vault
@@ -250,6 +266,36 @@ describe("ButtercupCSVImporter", function () {
                     [ATTRIBUTE_TAGS]: "kept",
                 });
                 expect({}.polluted).to.be.undefined;
+            });
+        });
+
+        it("keeps attributes named like built-in object properties (B-461)", function () {
+            const attributes = JSON.stringify({
+                constructor: "c",
+                prototype: "p",
+            }).replace(/"/g, '""');
+            return importRow(
+                "!entry_type,!attributes",
+                `login,"${attributes}"`,
+            ).then((vault) => {
+                const [entry] = vault.getAllEntries();
+                expect(entry.getAttribute("constructor")).to.equal("c");
+                expect(entry.getAttribute("prototype")).to.equal("p");
+            });
+        });
+
+        it("round-trips fields named like built-in object properties (B-461)", function () {
+            const vault = new Vault();
+            vault
+                .createGroup("General")
+                .createEntry("Test")
+                .setProperty("constructor", "c")
+                .setProperty("prototype", "p")
+                .setProperty("toString", "t");
+            return roundTrip(vault).then(([entry]) => {
+                expect(entry.getProperty("constructor")).to.equal("c");
+                expect(entry.getProperty("prototype")).to.equal("p");
+                expect(entry.getProperty("toString")).to.equal("t");
             });
         });
     });
