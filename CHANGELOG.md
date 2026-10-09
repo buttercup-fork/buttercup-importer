@@ -2,6 +2,8 @@
 
 ## Unreleased (codekunde fork)
 
+ * **Tooling**: CI runs on branch pushes only (plus manual runs); `husky`, `lint-staged` and `npm-run-all` are replaced or dropped (`npm-run-all2`; `npm run format` formats); `jsdoc-to-markdown` is no longer a dev dependency (`npm run docs` fetches it on demand), which clears the dev `npm audit` findings; `chai` 6, `mocha` 12.0.3. `npm audit` is clean
+
  * **Feature**:
    * [#64](https://github.com/buttercup/buttercup-importer/issues/64) / [#60](https://github.com/buttercup/buttercup-importer/issues/60) Buttercup CSV round trip: entries keep their type (website, note, credit card, SSH key) and their attributes (field value types such as multi-line notes and OTP, field order, tags), read from the `!entry_type` and `!attributes` columns that the exporter fork now writes. Before, every re-imported entry became a login, and a website's URL showed up as a custom `url` field. CSVs without these columns still import, as logins. An unknown entry type or attributes that aren't a JSON object fail the import with a message naming the entry; attachment references, the entry type and `__proto__`/`constructor`/`prototype` keys in `!attributes` are ignored
    * [#71](https://github.com/buttercup/buttercup-importer/issues/71) One-time passwords: 1Password `TOTP_` fields (in the item's sections) and Bitwarden `login.totp` now import as OTP fields, which desktop shows as a live code. A bare base32 secret is turned into an `otpauth://totp/` URI; values Buttercup can't show as a code (HOTP, Steam) are kept as plain text fields. The field is named after 1Password's label, or `OTP`, and never overwrites an existing field of the same name (it becomes `OTP 2`)

@@ -1,9 +1,9 @@
 # Buttercup Vault Importer
 > Import vaults from other password managers
 
-**CodeKunde fork** of [buttercup/buttercup-importer](https://github.com/buttercup/buttercup-importer), from 3.1.0. It runs straight from `source/` (no build step) and isn't on npm; the apps install it from git. See the [changelog](CHANGELOG.md). The badges below are upstream's.
+**CodeKunde fork** of [buttercup/buttercup-importer](https://github.com/buttercup/buttercup-importer), from 3.1.0. It runs straight from `source/` (no build step) and isn't on npm; the apps install it from git (`npm install github:buttercup-fork/buttercup-importer --save`). See the [changelog](CHANGELOG.md).
 
-[![npm](https://img.shields.io/npm/v/@buttercup/importer?color=green&label=%40buttercup%2Fimporter)](https://www.npmjs.com/package/@buttercup/importer) ![Tests](https://github.com/buttercup/buttercup-importer/actions/workflows/test.yml/badge.svg) ![npm downloads](https://img.shields.io/npm/dm/buttercup-importer.svg?maxAge=2592000)
+[![Buttercup](images/buttercup-slim.svg)](https://buttercup.codekunde.net) [![Tests](https://github.com/buttercup-fork/buttercup-importer/actions/workflows/test.yml/badge.svg)](https://github.com/buttercup-fork/buttercup-importer/actions/workflows/test.yml)
 
 ## About
 
