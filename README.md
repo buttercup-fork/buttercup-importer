@@ -18,15 +18,16 @@ You can of course use the importer in your own projects, by importing the indivi
 Eg.
 
 ```javascript
-const { KDBXImporter } = require("@buttercup/importer");
+const { BitwardenImporter } = require("@buttercup/importer");
 
-KDBXImporter.loadFromFile("...");
+const importer = await BitwardenImporter.loadFromFile("bitwarden-export.json");
+const vault = await importer.export();
 ```
 
 Check out the [API documentation](API.md).
 
 ### Supported platforms
-The importer requires Node **14** or later.
+The importer requires Node **22** or later.
 
 ### Supported password vault formats
 
