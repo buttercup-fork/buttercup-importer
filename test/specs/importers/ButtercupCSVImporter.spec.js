@@ -323,4 +323,104 @@ describe("ButtercupCSVImporter", function () {
             });
         });
     });
+
+    describe("links between entries (B-681)", function () {
+        const PASSWORD_LINK = `${Entry.Attributes.PropertyLinkPrefix}password`;
+        const LOGIN_LINK = Entry.Attributes.LoginEntry;
+
+        function byTitle(vault, title) {
+            const entry = vault
+                .getAllEntries()
+                .find((item) => item.getProperty("title") === title);
+            expect(entry).to.be.an.instanceOf(Entry);
+            return entry;
+        }
+
+        function importVault(vault) {
+            return exportVaultToCSV(vault).then((csv) =>
+                new ButtercupCSVImporter(csv).export(),
+            );
+        }
+
+        it("points links within the file at the imported entries", function () {
+            const vault = new Vault();
+            const group = vault.createGroup("General");
+            const account = group
+                .createEntry("Account")
+                .setProperty("password", "shared");
+            group
+                .createEntry("Linked")
+                .setProperty("password", "")
+                .linkProperty("password", account)
+                .setLoginEntry(account);
+            return importVault(vault).then((imported) => {
+                const newAccount = byTitle(imported, "Account");
+                const linked = byTitle(imported, "Linked");
+                expect(newAccount.id).to.not.equal(account.id);
+                expect(linked.getPropertyLink("password")).to.deep.equal({
+                    entryID: newAccount.id,
+                    property: "password",
+                });
+                expect(linked.getLoginEntry()).to.equal(newAccount);
+                newAccount.setProperty("password", "changed");
+                expect(linked.getProperty("password")).to.equal("changed");
+            });
+        });
+
+        it("drops links to entries that aren't in the file", function () {
+            // The ID of an entry in the vault the file is imported into
+            const outsideID = "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
+            const vault = new Vault();
+            vault
+                .createGroup("General")
+                .createEntry("Hostile")
+                .setProperty("url", "https://example.org")
+                .setProperty("password", "decoy")
+                .setAttribute(PASSWORD_LINK, `${outsideID}:password`)
+                .setAttribute(LOGIN_LINK, `${outsideID}:Bank`);
+            return importVault(vault).then((imported) => {
+                const entry = byTitle(imported, "Hostile");
+                expect(entry.getAttribute(PASSWORD_LINK)).to.be.undefined;
+                expect(entry.getAttribute(LOGIN_LINK)).to.be.undefined;
+                expect(entry.getProperty("password")).to.equal("decoy");
+            });
+        });
+
+        it("drops links to an ID that more than one row has", function () {
+            const otherID = "e17515ac-e87a-41e5-889c-88c279408cc9";
+            const groupID = "f9666f86-cb94-483f-bb89-99afa12656e2";
+            const link = JSON.stringify({
+                [PASSWORD_LINK]: `${otherID}:password`,
+            }).replace(/"/g, '""');
+            const csv = [
+                "!type,!group_id,!group_name,!group_parent,title,password,!attributes,id",
+                `group,${groupID},General,0,,,,`,
+                `entry,${groupID},,,First,one,,${otherID}`,
+                `entry,${groupID},,,Second,two,,${otherID}`,
+                `entry,${groupID},,,Linked,own,"${link}",e17515ac-e87a-41e5-889c-88c279408cca`,
+            ].join("\n");
+            return new ButtercupCSVImporter(csv).export().then((imported) => {
+                const entry = byTitle(imported, "Linked");
+                expect(entry.getAttribute(PASSWORD_LINK)).to.be.undefined;
+                expect(entry.getProperty("password")).to.equal("own");
+            });
+        });
+
+        it("drops a login entry link to the entry itself", function () {
+            const selfID = "e17515ac-e87a-41e5-889c-88c279408ccb";
+            const groupID = "f9666f86-cb94-483f-bb89-99afa12656e2";
+            const link = JSON.stringify({
+                [LOGIN_LINK]: `${selfID}:Self`,
+            }).replace(/"/g, '""');
+            const csv = [
+                "!type,!group_id,!group_name,!group_parent,title,!attributes,id",
+                `group,${groupID},General,0,,,`,
+                `entry,${groupID},,,Self,"${link}",${selfID}`,
+            ].join("\n");
+            return new ButtercupCSVImporter(csv).export().then((imported) => {
+                const entry = byTitle(imported, "Self");
+                expect(entry.getAttribute(LOGIN_LINK)).to.be.undefined;
+            });
+        });
+    });
 });
