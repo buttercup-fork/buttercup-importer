@@ -91,6 +91,30 @@ describe("ButtercupCSVImporter", function () {
         });
     });
 
+    it("removes the quote the exporter puts before formula-like cells (B-678)", function () {
+        const groupID = "f9666f86-cb94-483f-bb89-99afa12656e2";
+        const csv = [
+            "!type,!group_id,!group_name,!group_parent,title,f1,f2,f3,f4,f5,'=field,plain,quoted,id",
+            `group,${groupID},'=group,0,,,,,,,,,,`,
+            `entry,${groupID},,,'@title,'=1+1,''+2,'-3,'\t=4,'\r=5,named,'text,'',e17515ac-e87a-41e5-889c-88c279408cc8`,
+        ].join("\n");
+        return new ButtercupCSVImporter(csv).export().then((vault) => {
+            const [group] = vault.getGroups();
+            expect(group.getTitle()).to.equal("=group");
+            const [entry] = vault.getAllEntries();
+            expect(entry.getProperty("title")).to.equal("@title");
+            expect(entry.getProperty("f1")).to.equal("=1+1");
+            expect(entry.getProperty("f2")).to.equal("'+2");
+            expect(entry.getProperty("f3")).to.equal("-3");
+            expect(entry.getProperty("f4")).to.equal("\t=4");
+            expect(entry.getProperty("f5")).to.equal("\r=5");
+            expect(entry.getProperty("=field")).to.equal("named");
+            // A quote not followed by a formula character is part of the value
+            expect(entry.getProperty("plain")).to.equal("'text");
+            expect(entry.getProperty("quoted")).to.equal("''");
+        });
+    });
+
     it("imports an export that starts with a UTF-8 BOM (desktop #749)", function () {
         const vault = new Vault();
         vault

@@ -12,6 +12,16 @@ const SKIPPED_ATTRIBUTE = new RegExp(
 // Core refuses only this name: fields like "constructor" or "toString" are
 // ordinary fields, and exports keep them
 const UNSAFE_KEY = "__proto__";
+// The exporter puts one extra ' before a cell a spreadsheet would run as a
+// formula (= + - @, tab or CR, after any number of quotes); one is removed
+// here so the value comes back as it was (B-678)
+const ESCAPED_FORMULA_CELL = /^'+[=+\-@\t\r]/;
+
+function unescapeFormulaCell(cell) {
+    return typeof cell === "string" && ESCAPED_FORMULA_CELL.test(cell)
+        ? cell.slice(1)
+        : cell;
+}
 
 /**
  * Importer for Buttercup CSV exports
@@ -36,7 +46,17 @@ class ButtercupCSVImporter {
             const vault = new Vault();
             // Skip the BOM the export starts with (for Excel), or the first
             // column would be "\uFEFF!type" and no row would have a type
-            const rows = csvparse(this._csvData, { bom: true, columns: true });
+            const rows = csvparse(this._csvData, {
+                bom: true,
+                columns: (header) => header.map(unescapeFormulaCell),
+                on_record: (record) =>
+                    Object.fromEntries(
+                        Object.entries(record).map(([key, value]) => [
+                            key,
+                            unescapeFormulaCell(value),
+                        ]),
+                    ),
+            });
             rows.forEach((bcupItem) => {
                 const {
                     ["!type"]: itemType,
