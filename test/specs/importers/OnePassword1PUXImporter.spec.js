@@ -176,4 +176,33 @@ describe("OnePassword1PUXImporter: other inputs", function () {
             /Not a 1Password export/,
         );
     });
+
+    it("refuses an export.data that unpacks to more than 256 MiB (B-677)", async function () {
+        // A real .1pux, with the unpacked size its central directory
+        // declares for export.data raised to 300 MiB
+        const zip = make1pux();
+        const header = Buffer.from([0x50, 0x4b, 0x01, 0x02]);
+        let offset = zip.indexOf(header);
+        let patched = 0;
+        while (offset >= 0) {
+            const nameLength = zip.readUInt16LE(offset + 28);
+            const name = zip.toString(
+                "utf8",
+                offset + 46,
+                offset + 46 + nameLength,
+            );
+            if (name === "export.data") {
+                zip.writeUInt32LE(300 * 1024 * 1024, offset + 24);
+                patched += 1;
+            }
+            offset = zip.indexOf(header, offset + 4);
+        }
+        expect(patched).to.equal(1);
+        const error = await exportError(zip);
+        expect(error.message).to.equal(
+            "1Password export (.1pux) is too large: export.data unpacks to more than 256 MiB",
+        );
+        // Control: the same file with its real size imports
+        expect(await exportError(make1pux())).to.equal(null);
+    });
 });

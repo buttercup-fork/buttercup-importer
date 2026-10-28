@@ -1,15 +1,25 @@
 const { Entry } = require("buttercup");
 
+// Core refuses this property name, and one such field would fail the whole
+// import, so it is kept under the next free name instead (B-676)
+const REFUSED_NAME = "__proto__";
+
 /**
- * Find a property name that the entry doesn't use yet
+ * Find a property name that the entry doesn't use yet (and that core
+ * accepts: `__proto__` becomes `__proto__ 2`)
  * @param {Entry} entry The entry
  * @param {String} name The preferred name
  * @returns {String}
  * @private
  */
 function unusedPropertyName(entry, name) {
+    let i = 1;
     let candidate = name;
-    for (let i = 2; entry.getProperty(candidate) !== undefined; i += 1) {
+    while (
+        candidate === REFUSED_NAME ||
+        entry.getProperty(candidate) !== undefined
+    ) {
+        i += 1;
         candidate = `${name} ${i}`;
     }
     return candidate;

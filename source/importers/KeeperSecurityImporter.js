@@ -5,6 +5,7 @@ const {
     createEntryFacade,
     consumeEntryFacade,
 } = require("buttercup");
+const { parseImportJSON } = require("../tools/json.js");
 
 const DEFAULT_GROUP = "General";
 
@@ -30,7 +31,7 @@ class KeeperSecurityImporter {
         const groups = {};
         return Promise.resolve().then(() => {
             const vault = new Vault();
-            const ksJson = JSON.parse(this._data); // Parse the new JSON data
+            const ksJson = parseImportJSON(this._data, "Keeper export");
 
             // Create the root group
             const rootGroup = vault.createGroup(DEFAULT_GROUP);

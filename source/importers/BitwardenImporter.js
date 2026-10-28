@@ -1,6 +1,8 @@
 const fs = require("fs/promises");
 const { Entry, EntryType, Vault } = require("buttercup");
 const { addOTPProperty } = require("../tools/otp.js");
+const { addProperty } = require("../tools/properties.js");
+const { parseImportJSON } = require("../tools/json.js");
 
 const DEFAULT_GROUP = "General";
 
@@ -46,9 +48,19 @@ function importCard(entry, card) {
     }
 }
 
+// Identity keys that would land on an entry field with another meaning: an
+// identity's `title` is Mr, Ms etc., not the entry title (B-673)
+const IDENTITY_KEY_NAMES = {
+    title: "Name title",
+};
+
 function importIdentity(entry, identity) {
     Object.keys(identity).forEach((key) => {
-        setIfPresent(entry, key, identity[key]);
+        const value = identity[key];
+        if (value !== null && value !== undefined && value !== "") {
+            // Never over an existing field (B-673)
+            addProperty(entry, IDENTITY_KEY_NAMES[key] || key, `${value}`);
+        }
     });
 }
 
@@ -80,7 +92,7 @@ class BitwardenImporter {
     export() {
         return Promise.resolve().then(() => {
             const vault = new Vault();
-            const bwJson = JSON.parse(this._data);
+            const bwJson = parseImportJSON(this._data, "Bitwarden export");
             if (bwJson.encrypted) {
                 throw new Error(
                     "Encrypted Bitwarden exports can't be imported: export the vault as unencrypted JSON instead",
@@ -144,9 +156,16 @@ class BitwardenImporter {
                     }
                 }
 
+                // Added under a free name, so a custom field called
+                // password, username or title can't replace the real one
+                // (B-673)
                 (bitwardenItem.fields || []).forEach((itemField) => {
                     if (itemField.name && itemField.value != null) {
-                        entry.setProperty(itemField.name, `${itemField.value}`);
+                        addProperty(
+                            entry,
+                            itemField.name,
+                            `${itemField.value}`,
+                        );
                     }
                 });
                 // After the custom fields, so one named OTP can't overwrite it

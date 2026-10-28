@@ -1,4 +1,5 @@
 const { onePasswordItemToEntry } = require("./1passwordEntry.js");
+const { parseImportJSON } = require("./json.js");
 
 const ONEPASS_FOLDER = /^system\.folder/i;
 const ONEPASS_SPACER = /^\*\*\*.+/;
@@ -57,11 +58,22 @@ function normalizeItem(item) {
 function convert1pifToJSON(onePifRaw) {
     const items = onePifRaw
         .split(/\r\n|\n/)
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0 && ONEPASS_SPACER.test(line) !== true)
-        .map((line) => normalizeItem(JSON.parse(line)));
-    const groups = {};
-    const entries = {};
+        .map((line, index) => ({ text: line.trim(), number: index + 1 }))
+        .filter(
+            ({ text }) => text.length > 0 && ONEPASS_SPACER.test(text) !== true,
+        )
+        .map(({ text, number }) =>
+            normalizeItem(
+                parseImportJSON(
+                    text,
+                    `1Password export (.1pif) line ${number}`,
+                ),
+            ),
+        );
+    // No prototype: an item UUID or type name like __proto__ or constructor
+    // is a key like any other (B-676)
+    const groups = Object.create(null);
+    const entries = Object.create(null);
     // let defaultGroup = null;
 
     const groupNames = items
@@ -88,7 +100,37 @@ function convert1pifToJSON(onePifRaw) {
             }
         }
     });
+    attachOrphans(groups, entries);
     return mergeItemsToTree(groups, entries);
+}
+
+/**
+ * Put items and folders whose folder is not in the export (or whose folders
+ * are each other's parents) under the root. The tree is built from the root
+ * down, so they were never reached and were dropped without an error (B-674)
+ * @param {Object} groups Groups key=>value list
+ * @param {Object} entries Entries key=>value list
+ * @private
+ */
+function attachOrphans(groups, entries) {
+    Object.values(groups).forEach((group) => {
+        const seen = new Set([group.id]);
+        let current = group;
+        while (current.parentID !== null) {
+            const parent = groups[current.parentID];
+            if (!parent || seen.has(parent.id)) {
+                current.parentID = null;
+                break;
+            }
+            seen.add(parent.id);
+            current = parent;
+        }
+    });
+    Object.values(entries).forEach((entry) => {
+        if (entry.groupID && !groups[entry.groupID]) {
+            entry.groupID = null;
+        }
+    });
 }
 
 /**

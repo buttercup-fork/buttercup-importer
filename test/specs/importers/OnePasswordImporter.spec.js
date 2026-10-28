@@ -84,3 +84,65 @@ describe("OnePasswordImporter (1Password for Windows 4, #40)", function () {
         expect(entry.getProperty("cardholder")).to.equal("Jane Doe");
     });
 });
+
+describe("OnePasswordImporter (folders missing from the export, B-674)", function () {
+    const folder = (uuid, title, folderUuid) => ({
+        uuid,
+        typeName: "system.folder.Regular",
+        title,
+        ...(folderUuid ? { folderUuid } : {}),
+    });
+    const login = (uuid, title, folderUuid) => ({
+        uuid,
+        typeName: "webforms.WebForm",
+        title,
+        ...(folderUuid ? { folderUuid } : {}),
+        secureContents: {
+            fields: [{ designation: "password", value: `${title} password` }],
+        },
+    });
+
+    function importItems(items) {
+        const data = items
+            .map((item) => JSON.stringify(item))
+            .join("\n***5642bee8-a5ff-11dc-8314-0800200c9a66***\n");
+        return new OnePasswordImporter(data).export();
+    }
+
+    it("imports every item, also those whose folder is not in the export", function () {
+        return importItems([
+            folder("f1", "Kept"),
+            folder("f2", "Parent gone", "gone-folder"),
+            folder("f3", "Loop A", "f4"),
+            folder("f4", "Loop B", "f3"),
+            login("i1", "In kept folder", "f1"),
+            login("i2", "Folder gone", "gone-folder"),
+            login("i3", "In folder with gone parent", "f2"),
+            login("i4", "In folder loop", "f3"),
+            login("i5", "No folder"),
+        ]).then((vault) => {
+            const entries = vault.getAllEntries();
+            expect(
+                entries.map((entry) => entry.getProperty("title")),
+            ).to.have.members([
+                "In kept folder",
+                "Folder gone",
+                "In folder with gone parent",
+                "In folder loop",
+                "No folder",
+            ]);
+            const groupOf = (title) =>
+                vault
+                    .findEntriesByProperty("title", title)[0]
+                    .getGroup()
+                    .getTitle();
+            expect(groupOf("In kept folder")).to.equal("Kept");
+            expect(groupOf("Folder gone")).to.equal("Imported 1password vault");
+            expect(groupOf("In folder with gone parent")).to.equal(
+                "Parent gone",
+            );
+            expect(groupOf("In folder loop")).to.equal("Loop A");
+            expect(groupOf("No folder")).to.equal("webforms.WebForm");
+        });
+    });
+});

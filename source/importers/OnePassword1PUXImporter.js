@@ -9,8 +9,14 @@ const {
 const { sectionFieldToProperty } = require("../tools/1passwordEntry.js");
 const { addOTPProperty } = require("../tools/otp.js");
 const { addProperty } = require("../tools/properties.js");
+const { parseImportJSON } = require("../tools/json.js");
 
 const EXPORT_DATA = "export.data";
+// The largest export.data unpacked. fflate allocates the size the zip
+// declares before inflating (and writes no further), so refusing a larger
+// declared size bounds the memory used; a few MiB of zip could declare
+// GiBs (B-677)
+const MAX_EXPORT_DATA_SIZE = 256 * 1024 * 1024;
 const ARCHIVED_GROUP = "Archived";
 
 // 1Password item categories
@@ -184,13 +190,26 @@ class OnePassword1PUXImporter {
     export() {
         return Promise.resolve().then(() => {
             let files;
+            let tooLarge = false;
             try {
                 files = unzipSync(new Uint8Array(this._data), {
-                    filter: (file) => file.name === EXPORT_DATA,
+                    filter: (file) => {
+                        if (file.name !== EXPORT_DATA) return false;
+                        if (file.originalSize > MAX_EXPORT_DATA_SIZE) {
+                            tooLarge = true;
+                            return false;
+                        }
+                        return true;
+                    },
                 });
             } catch (err) {
                 throw new Error(
                     `Not a 1Password export (.1pux): ${err.message}`,
+                );
+            }
+            if (tooLarge) {
+                throw new Error(
+                    `1Password export (.1pux) is too large: ${EXPORT_DATA} unpacks to more than ${MAX_EXPORT_DATA_SIZE / 1024 / 1024} MiB`,
                 );
             }
             if (!files[EXPORT_DATA]) {
@@ -198,7 +217,10 @@ class OnePassword1PUXImporter {
                     `Not a 1Password export (.1pux): ${EXPORT_DATA} is missing`,
                 );
             }
-            const exportData = JSON.parse(strFromU8(files[EXPORT_DATA]));
+            const exportData = parseImportJSON(
+                strFromU8(files[EXPORT_DATA]),
+                `1Password export (.1pux) ${EXPORT_DATA}`,
+            );
             const vault = new Vault();
             (exportData.accounts || []).forEach((account) => {
                 (account.vaults || []).forEach((onePassVault) => {

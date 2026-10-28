@@ -23,14 +23,17 @@ class LastPassImporter {
      * @memberof LastPassImporter
      */
     export() {
-        const groups = {};
+        // A Map, so a group named constructor, toString or __proto__ is a
+        // group like any other, not an Object.prototype member (B-676)
+        const groups = new Map();
         return Promise.resolve().then(() => {
             const vault = new Vault();
             parseCSV(this._data).forEach((lastpassItem) => {
                 const groupName = lastpassItem.grouping || DEFAULT_GROUP;
-                const group =
-                    groups[groupName] ||
-                    (groups[groupName] = vault.createGroup(groupName));
+                if (!groups.has(groupName)) {
+                    groups.set(groupName, vault.createGroup(groupName));
+                }
+                const group = groups.get(groupName);
                 const entry = group
                     .createEntry(lastpassItem.name)
                     .setProperty("username", lastpassItem.username)
