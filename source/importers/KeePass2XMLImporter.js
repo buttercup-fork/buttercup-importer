@@ -2,6 +2,7 @@ const fs = require("fs");
 const xml2js = require("xml2js");
 const { Layerr } = require("layerr");
 const { Vault } = require("buttercup");
+const { addProperty } = require("../tools/properties.js");
 
 function extractString(obj) {
     if (typeof obj === "string") {
@@ -42,7 +43,10 @@ function processGroup(group, archive, currentGroup) {
                         ) {
                             entry.setProperty(friendlyKey, actualValue);
                         } else {
-                            entry.setProperty(actualKey, actualValue);
+                            // Under a free name: a key named __proto__ is
+                            // kept as "__proto__ 2" instead of failing the
+                            // import (B-676)
+                            addProperty(entry, actualKey, actualValue);
                         }
                     });
                 }

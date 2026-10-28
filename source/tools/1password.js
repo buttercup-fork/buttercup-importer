@@ -60,8 +60,10 @@ function convert1pifToJSON(onePifRaw) {
         .map((line) => line.trim())
         .filter((line) => line.length > 0 && ONEPASS_SPACER.test(line) !== true)
         .map((line) => normalizeItem(JSON.parse(line)));
-    const groups = {};
-    const entries = {};
+    // No prototype: an item UUID or type name like __proto__ or constructor
+    // is a key like any other (B-676)
+    const groups = Object.create(null);
+    const entries = Object.create(null);
     // let defaultGroup = null;
 
     const groupNames = items
