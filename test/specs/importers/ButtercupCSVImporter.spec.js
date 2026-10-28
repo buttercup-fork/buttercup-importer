@@ -115,6 +115,74 @@ describe("ButtercupCSVImporter", function () {
         });
     });
 
+    it("reads fields the exporter wrote under an escaped column name (B-680)", function () {
+        // One backslash, built here so no tool or editor turns it into an
+        // escape sequence
+        const bs = String.fromCharCode(92);
+        const groupID = "f9666f86-cb94-483f-bb89-99afa12656e2";
+        const entryID = "e17515ac-e87a-41e5-889c-88c279408cc8";
+        const escaped = [
+            "id",
+            "!type",
+            "!group_id",
+            "!group_name",
+            "!group_parent",
+            "!entry_type",
+            "!attributes",
+            "!",
+            `${bs}note`,
+            bs,
+        ];
+        const header = [
+            "!type",
+            "!group_id",
+            "!group_name",
+            "!group_parent",
+            "!entry_type",
+            "!attributes",
+            "title",
+            "password",
+            ...escaped.map((name) => `${bs}${name}`),
+            bs,
+            "id",
+        ];
+        const entryRow = [
+            "entry",
+            groupID,
+            "",
+            "",
+            "login",
+            "",
+            "Test",
+            "pw",
+            ...escaped.map((name, index) => `value ${index}`),
+            "no name",
+            entryID,
+        ];
+        const groupRow = ["group", groupID, "General", "0"].concat(
+            header.slice(4).map(() => ""),
+        );
+        const csv = [header, groupRow, entryRow]
+            .map((row) =>
+                row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","),
+            )
+            .join("\n");
+        return new ButtercupCSVImporter(csv).export().then((vault) => {
+            const [entry] = vault.getAllEntries();
+            expect(entry.getProperty("title")).to.equal("Test");
+            expect(entry.getProperty("password")).to.equal("pw");
+            expect(entry.getType()).to.equal("login");
+            escaped.forEach((name, index) => {
+                expect(entry.getProperty(name)).to.equal(`value ${index}`);
+            });
+            // A column named only by the escape holds no property name
+            expect(Object.keys(entry.getProperty())).to.not.include("");
+            expect(Object.keys(entry.getProperty())).to.have.lengthOf(
+                2 + escaped.length,
+            );
+        });
+    });
+
     it("imports an export that starts with a UTF-8 BOM (desktop #749)", function () {
         const vault = new Vault();
         vault

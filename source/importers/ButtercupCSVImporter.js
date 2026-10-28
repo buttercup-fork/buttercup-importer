@@ -21,6 +21,28 @@ const LINK_ATTRIBUTE = new RegExp(
 // here so the value comes back as it was (B-678)
 const ESCAPED_FORMULA_CELL = /^'+[=+\-@\t\r]/;
 
+// The exporter writes a field whose name is `id`, starts with `!` or starts
+// with `\` in a column named with one extra `\` in front, so it can't clash
+// with a system column (B-680)
+const PROPERTY_ESCAPE = "\\";
+
+/**
+ * The entry property a column holds
+ * @param {String} column The column name (formula escape already removed)
+ * @returns {String|null} The property name, or null for a system column
+ *  (`!type`, `!group_id`..., `id`) and the title, which is set on creation
+ * @private
+ */
+function propertyName(column) {
+    if (column.startsWith(PROPERTY_ESCAPE)) {
+        return column.slice(PROPERTY_ESCAPE.length) || null;
+    }
+    if (/^!.+/.test(column) || NON_COPY_KEYS.includes(column)) {
+        return null;
+    }
+    return column;
+}
+
 function unescapeFormulaCell(cell) {
     return typeof cell === "string" && ESCAPED_FORMULA_CELL.test(cell)
         ? cell.slice(1)
@@ -86,12 +108,13 @@ class ButtercupCSVImporter {
                     }
                     const entry = group.createEntry(bcupItem.title);
                     Object.keys(bcupItem)
-                        .filter((key) => /^\!.+/.test(key) === false)
-                        .filter((key) => NON_COPY_KEYS.indexOf(key) === -1)
-                        .filter((key) => key !== UNSAFE_KEY)
                         .filter((key) => bcupItem[key])
-                        .forEach((key) => {
-                            entry.setProperty(key, bcupItem[key]);
+                        .map((key) => [propertyName(key), bcupItem[key]])
+                        .filter(
+                            ([name]) => name !== null && name !== UNSAFE_KEY,
+                        )
+                        .forEach(([name, value]) => {
+                            entry.setProperty(name, value);
                         });
                     setEntryType(entry, bcupItem["!entry_type"]);
                     links.push(
