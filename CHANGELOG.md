@@ -34,6 +34,7 @@
    * Bitwarden: an identity's `title` (Mr, Ms...) replaced the entry title, and a custom field named `password`, `username`, `title` or `URL` replaced the login's own value. The identity title is now the field "Name title", and identity details and custom fields are added under a free name (`password 2`), never over an existing field (B-673)
    * Names that are `Object.prototype` members no longer abort the whole import: a LastPass group named `constructor`, `toString` or `__proto__` (the importer kept groups in a plain object), a `.1pif` folder whose UUID is `__proto__`, and a field named `__proto__` in Bitwarden, KeePass XML or 1Password (`.1pif`, `.1pux`) files (core refuses that name). Such a field is kept as `__proto__ 2` (B-676)
    * A Bitwarden, Keeper or 1Password (`.1pif`, `.1pux`) file that is not valid JSON failed with the parser's message, which for some errors quotes the text around the error (for example the start of a password); desktop writes that message to its log and shows it. The error now says only which file is broken, with the line and column when the parser gives them (B-675)
+   * 1Password `.1pif`: an item in a folder that is not in the export, or in a folder whose parent is missing or whose folders are each other's parents, was dropped without an error. These items and folders now go under the import's root group (B-674)
 
 ## v3.1.0
 _2020-10-26_

@@ -100,7 +100,37 @@ function convert1pifToJSON(onePifRaw) {
             }
         }
     });
+    attachOrphans(groups, entries);
     return mergeItemsToTree(groups, entries);
+}
+
+/**
+ * Put items and folders whose folder is not in the export (or whose folders
+ * are each other's parents) under the root. The tree is built from the root
+ * down, so they were never reached and were dropped without an error (B-674)
+ * @param {Object} groups Groups key=>value list
+ * @param {Object} entries Entries key=>value list
+ * @private
+ */
+function attachOrphans(groups, entries) {
+    Object.values(groups).forEach((group) => {
+        const seen = new Set([group.id]);
+        let current = group;
+        while (current.parentID !== null) {
+            const parent = groups[current.parentID];
+            if (!parent || seen.has(parent.id)) {
+                current.parentID = null;
+                break;
+            }
+            seen.add(parent.id);
+            current = parent;
+        }
+    });
+    Object.values(entries).forEach((entry) => {
+        if (entry.groupID && !groups[entry.groupID]) {
+            entry.groupID = null;
+        }
+    });
 }
 
 /**
