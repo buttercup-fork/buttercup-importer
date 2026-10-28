@@ -193,6 +193,72 @@ describe("BitwardenImporter (current export format, #51)", function () {
         });
     });
 
+    it("keeps the entry title when an identity has a title (B-673)", function () {
+        return importJSON({
+            folders: [],
+            items: [
+                item({
+                    name: "My identity",
+                    type: 4,
+                    identity: {
+                        title: "Mr",
+                        firstName: "John",
+                        username: "jd",
+                    },
+                }),
+            ],
+        }).then((vault) => {
+            const [entry] = vault.getAllEntries();
+            expect(entry.getProperty("title")).to.equal("My identity");
+            expect(entry.getProperty("Name title")).to.equal("Mr");
+            expect(entry.getProperty("firstName")).to.equal("John");
+            expect(entry.getProperty("username")).to.equal("jd");
+        });
+    });
+
+    it("keeps login fields when custom fields have the same names (B-673)", function () {
+        return importJSON({
+            folders: [],
+            items: [
+                item({
+                    name: "Login",
+                    type: 1,
+                    login: {
+                        username: "real-user",
+                        password: "real-pw",
+                        uris: [{ uri: "https://real.example" }],
+                    },
+                    fields: [
+                        { name: "password", value: "field-pw", type: 1 },
+                        { name: "username", value: "field-user", type: 0 },
+                        { name: "title", value: "field-title", type: 0 },
+                        {
+                            name: "URL",
+                            value: "https://field.example",
+                            type: 0,
+                        },
+                        { name: "extra", value: "one", type: 0 },
+                        { name: "extra", value: "two", type: 0 },
+                    ],
+                }),
+            ],
+        }).then((vault) => {
+            const [entry] = vault.getAllEntries();
+            expect(entry.getProperty("title")).to.equal("Login");
+            expect(entry.getProperty("username")).to.equal("real-user");
+            expect(entry.getProperty("password")).to.equal("real-pw");
+            expect(entry.getProperty("URL")).to.equal("https://real.example");
+            expect(entry.getProperty("password 2")).to.equal("field-pw");
+            expect(entry.getProperty("username 2")).to.equal("field-user");
+            expect(entry.getProperty("title 2")).to.equal("field-title");
+            expect(entry.getProperty("URL 2")).to.equal(
+                "https://field.example",
+            );
+            expect(entry.getProperty("extra")).to.equal("one");
+            expect(entry.getProperty("extra 2")).to.equal("two");
+        });
+    });
+
     it("imports SSH keys as SSH key entries", function () {
         return importJSON({
             folders: [],

@@ -31,6 +31,7 @@
    * [#66](https://github.com/buttercup/buttercup-importer/issues/66) CSV and LastPass imports failed with "Invalid Closing Quote" on exports that escape quotes with a backslash (as 1Password does), or have stray quotes in unquoted fields. Standard CSV is still parsed strictly; only files that fail get a second, more lenient parse
    * LastPass: multi-line notes from Windows exports kept their `\r\n` line breaks
    * [#31](https://github.com/buttercup/buttercup-importer/issues/31) KeePass XML URLs are imported (the report was about the KDBX import removed in 3.0.0); a new spec covers it
+   * Bitwarden: an identity's `title` (Mr, Ms...) replaced the entry title, and a custom field named `password`, `username`, `title` or `URL` replaced the login's own value. The identity title is now the field "Name title", and identity details and custom fields are added under a free name (`password 2`), never over an existing field (B-673)
 
 ## v3.1.0
 _2020-10-26_
