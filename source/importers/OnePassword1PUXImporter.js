@@ -9,6 +9,7 @@ const {
 const { sectionFieldToProperty } = require("../tools/1passwordEntry.js");
 const { addOTPProperty } = require("../tools/otp.js");
 const { addProperty } = require("../tools/properties.js");
+const { parseImportJSON } = require("../tools/json.js");
 
 const EXPORT_DATA = "export.data";
 const ARCHIVED_GROUP = "Archived";
@@ -198,7 +199,10 @@ class OnePassword1PUXImporter {
                     `Not a 1Password export (.1pux): ${EXPORT_DATA} is missing`,
                 );
             }
-            const exportData = JSON.parse(strFromU8(files[EXPORT_DATA]));
+            const exportData = parseImportJSON(
+                strFromU8(files[EXPORT_DATA]),
+                `1Password export (.1pux) ${EXPORT_DATA}`,
+            );
             const vault = new Vault();
             (exportData.accounts || []).forEach((account) => {
                 (account.vaults || []).forEach((onePassVault) => {

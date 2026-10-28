@@ -1,4 +1,5 @@
 const { onePasswordItemToEntry } = require("./1passwordEntry.js");
+const { parseImportJSON } = require("./json.js");
 
 const ONEPASS_FOLDER = /^system\.folder/i;
 const ONEPASS_SPACER = /^\*\*\*.+/;
@@ -57,9 +58,18 @@ function normalizeItem(item) {
 function convert1pifToJSON(onePifRaw) {
     const items = onePifRaw
         .split(/\r\n|\n/)
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0 && ONEPASS_SPACER.test(line) !== true)
-        .map((line) => normalizeItem(JSON.parse(line)));
+        .map((line, index) => ({ text: line.trim(), number: index + 1 }))
+        .filter(
+            ({ text }) => text.length > 0 && ONEPASS_SPACER.test(text) !== true,
+        )
+        .map(({ text, number }) =>
+            normalizeItem(
+                parseImportJSON(
+                    text,
+                    `1Password export (.1pif) line ${number}`,
+                ),
+            ),
+        );
     // No prototype: an item UUID or type name like __proto__ or constructor
     // is a key like any other (B-676)
     const groups = Object.create(null);

@@ -2,6 +2,7 @@ const fs = require("fs/promises");
 const { Entry, EntryType, Vault } = require("buttercup");
 const { addOTPProperty } = require("../tools/otp.js");
 const { addProperty } = require("../tools/properties.js");
+const { parseImportJSON } = require("../tools/json.js");
 
 const DEFAULT_GROUP = "General";
 
@@ -91,7 +92,7 @@ class BitwardenImporter {
     export() {
         return Promise.resolve().then(() => {
             const vault = new Vault();
-            const bwJson = JSON.parse(this._data);
+            const bwJson = parseImportJSON(this._data, "Bitwarden export");
             if (bwJson.encrypted) {
                 throw new Error(
                     "Encrypted Bitwarden exports can't be imported: export the vault as unencrypted JSON instead",
