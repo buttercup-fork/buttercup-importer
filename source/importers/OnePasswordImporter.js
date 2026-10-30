@@ -17,16 +17,20 @@ const { EntryPropertyValueType, Vault } = Buttercup;
 function mapTreeLevelToVault(parentVaultItem, treeLevel) {
     const group = parentVaultItem.createGroup(treeLevel.title);
     treeLevel.entries.forEach(function (rawEntry) {
-        const entry = group.createEntry(rawEntry.title);
+        const entry = group.createEntry(`${rawEntry.title}`);
+        // 1Password exports can hold numbers (card number, CVV, expiry) or
+        // null where core expects text: a Format A vault throws on them,
+        // which failed the whole import (B-22, buttercup-desktop#1098)
+        const setText = (name, value) => {
+            if (value !== undefined && value !== null && value !== "") {
+                entry.setProperty(name, `${value}`);
+            }
+        };
         Object.keys(rawEntry.meta).forEach(function (metaKey) {
-            entry.setProperty(metaKey, rawEntry.meta[metaKey]);
+            setText(metaKey, rawEntry.meta[metaKey]);
         });
-        if (rawEntry.username) {
-            entry.setProperty("username", rawEntry.username);
-        }
-        if (rawEntry.password) {
-            entry.setProperty("password", rawEntry.password);
-        }
+        setText("username", rawEntry.username);
+        setText("password", rawEntry.password);
         (rawEntry.fields || []).forEach(function ({ name, value, valueType }) {
             if (valueType === EntryPropertyValueType.OTP) {
                 addOTPProperty(entry, name, value);
@@ -35,7 +39,10 @@ function mapTreeLevelToVault(parentVaultItem, treeLevel) {
             }
         });
         Object.keys(rawEntry.attributes).forEach(function (attributeKey) {
-            entry.setAttribute(attributeKey, rawEntry.attributes[attributeKey]);
+            const value = rawEntry.attributes[attributeKey];
+            if (value !== undefined && value !== null) {
+                entry.setAttribute(attributeKey, `${value}`);
+            }
         });
     });
     treeLevel.groups.forEach(function (rawGroup) {

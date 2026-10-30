@@ -1,6 +1,14 @@
 const path = require("path");
 const OnePasswordImporter = require("../../../source/importers/OnePasswordImporter.js");
-const { Entry, Group, Vault } = require("buttercup");
+const {
+    Entry,
+    Group,
+    Vault,
+    VaultFormatA,
+    consumeVaultFacade,
+    createVaultFacade,
+    setDefaultFormat,
+} = require("buttercup");
 
 const EXAMPLE_VAULT = path.resolve(
     __dirname,
@@ -144,5 +152,80 @@ describe("OnePasswordImporter (folders missing from the export, B-674)", functio
             expect(groupOf("In folder loop")).to.equal("Loop A");
             expect(groupOf("No folder")).to.equal("webforms.WebForm");
         });
+    });
+});
+
+describe("OnePasswordImporter (values that are not text, B-22, desktop#1098)", function () {
+    const SEPARATOR = "\n***5642bee8-a5ff-11dc-8314-0800200c9a66***\n";
+    const ITEMS = [
+        {
+            uuid: "c1",
+            typeName: "wallet.financial.CreditCard",
+            title: "Card with numbers",
+            secureContents: {
+                ccnum: 4111111111111111,
+                cvv: 123,
+                expiry_mm: 3,
+                expiry_yy: 2027,
+            },
+        },
+        {
+            uuid: "l1",
+            typeName: "webforms.WebForm",
+            title: "Login with a number and an empty password",
+            secureContents: {
+                fields: [
+                    { designation: "username", value: 12345 },
+                    { designation: "password", value: null },
+                ],
+            },
+        },
+    ];
+    const importItems = () =>
+        new OnePasswordImporter(
+            ITEMS.map((item) => JSON.stringify(item)).join(SEPARATOR),
+        ).export();
+
+    it("sets only text values on the entries", async function () {
+        const vault = await importItems();
+        const entries = vault.getAllEntries();
+        expect(entries).to.have.lengthOf(2);
+        entries.forEach((entry) => {
+            Object.entries(entry.getProperty()).forEach(([name, value]) => {
+                expect(value, `${entry.getProperty("title")}: ${name}`).to.be.a(
+                    "string",
+                );
+            });
+        });
+        const card = vault.findEntriesByProperty(
+            "title",
+            "Card with numbers",
+        )[0];
+        expect(card.getProperty("username")).to.equal("4111111111111111");
+        expect(card.getProperty("password")).to.equal("123");
+        expect(card.getProperty("expiry-month")).to.equal("3");
+        expect(card.getProperty("expiry-year")).to.equal("2027");
+        const login = vault.findEntriesByProperty("title", /^Login with/)[0];
+        expect(login.getProperty("username")).to.equal("12345");
+    });
+
+    it("merges into a Format A vault, as desktop's import does", async function () {
+        const imported = await importItems();
+        setDefaultFormat(VaultFormatA);
+        let target;
+        try {
+            target = Vault.createWithDefaults();
+        } finally {
+            setDefaultFormat();
+        }
+        expect(target.format).to.be.an.instanceOf(VaultFormatA);
+        consumeVaultFacade(target, createVaultFacade(imported), {
+            mergeMode: true,
+        });
+        const card = target.findEntriesByProperty(
+            "title",
+            "Card with numbers",
+        )[0];
+        expect(card.getProperty("expiry-month")).to.equal("3");
     });
 });
