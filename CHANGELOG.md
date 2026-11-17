@@ -1,6 +1,6 @@
 # Buttercup importer changelog
 
-## Unreleased (codekunde fork)
+## v3.2.0 (codekunde fork)
 
  * **Tooling**: CI runs on branch pushes only (plus manual runs); `husky`, `lint-staged` and `npm-run-all` are replaced or dropped (`npm-run-all2`; `npm run format` formats); `jsdoc-to-markdown` is no longer a dev dependency (`npm run docs` fetches it on demand), which clears the dev `npm audit` findings; `chai` 6, `mocha` 12.0.3. `npm audit` is clean
 
