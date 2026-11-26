@@ -1,7 +1,7 @@
 # Buttercup Vault Importer
 > Import vaults from other password managers
 
-**CodeKunde fork** of [buttercup/buttercup-importer](https://github.com/buttercup/buttercup-importer), from 3.1.0. It runs straight from `source/` (no build step) and isn't on npm; the apps install it from git (`npm install github:buttercup-fork/buttercup-importer --save`). See the [changelog](CHANGELOG.md).
+**CodeKunde fork** of [buttercup/buttercup-importer](https://github.com/buttercup/buttercup-importer), from 3.1.0. It runs straight from `source/` (no build step) and is published on npm as `@buttercup-fork/importer` (`@buttercup/importer` on npm is upstream's 3.1.0). See the [changelog](CHANGELOG.md).
 
 [![Buttercup](images/buttercup-slim.svg)](https://buttercup.codekunde.net) [![Tests](https://github.com/buttercup-fork/buttercup-importer/actions/workflows/test.yml/badge.svg)](https://github.com/buttercup-fork/buttercup-importer/actions/workflows/test.yml)
 
@@ -13,12 +13,18 @@ This vault importer coverts password vaults from other formats to the Buttercup 
 
 This library is not intended to be used as a standalone application. Its functionality is available via the Buttercup Desktop applications.
 
-You can of course use the importer in your own projects, by importing the individual importers.
+You can of course use the importer in your own projects, by importing the individual importers. It loads Buttercup core as `buttercup` (a peer dependency), so install the fork's core under that name:
+
+```shell
+npm install @buttercup-fork/importer buttercup@npm:@buttercup-fork/core --save
+```
+
+Until `@buttercup-fork/core` is on npm, install core from git instead: `buttercup@github:buttercup-fork/buttercup-core`.
 
 Eg.
 
 ```javascript
-const { BitwardenImporter } = require("@buttercup/importer");
+const { BitwardenImporter } = require("@buttercup-fork/importer");
 
 const importer = await BitwardenImporter.loadFromFile("bitwarden-export.json");
 const vault = await importer.export();

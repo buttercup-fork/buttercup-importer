@@ -1,6 +1,11 @@
 # Buttercup importer changelog
 
-## v3.2.0 (codekunde fork)
+## v3.2.1
+_2026-11-26_ (CodeKunde fork)
+
+ * **New package name:** `@buttercup-fork/importer` on npm (require it instead of `@buttercup/importer`), staged from GitHub Actions through trusted publishing with provenance (`publish.yml`, started by hand); the package name `@buttercup/importer` stays upstream's. Core is still loaded as `buttercup` (peer dependency): install the fork's core under that name (`buttercup@npm:@buttercup-fork/core`)
+
+## v3.2.0 (CodeKunde fork)
 
  * **Tooling**: CI runs on branch pushes only (plus manual runs); `husky`, `lint-staged` and `npm-run-all` are replaced or dropped (`npm-run-all2`; `npm run format` formats); `jsdoc-to-markdown` is no longer a dev dependency (`npm run docs` fetches it on demand), which clears the dev `npm audit` findings; `chai` 6, `mocha` 12.0.3. `npm audit` is clean
 
